@@ -1,13 +1,11 @@
 ---
 permalink: /
-title: "Academic Pages is a ready-to-fork GitHub Pages template for academic personal websites"
+title: "# Welcome to My Personal Homepage"
 author_profile: true
 redirect_from: 
   - /about/
   - /about.html
 ---
-
-# Welcome to My Personal Homepage
 
 ## About Me
 Hello, I am Jiang Zhenyu (CYJiang), a code enthusiast with a passion for open source.
