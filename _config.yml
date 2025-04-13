@@ -22,7 +22,7 @@ repository               : "googs1025/googs1025.github.io"
 #               Additional customization can be done by editing /_includes/author-profile.html
 author:
   # Biographic information
-  avatar           : "images/两寸.jpg"
+  avatar           : "两寸.jpg"
   name             : "CYJiang"
   # pronouns         : # example: "she/her"
   # bio              : "Short biography for the left-hand sidebar"
