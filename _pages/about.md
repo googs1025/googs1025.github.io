@@ -26,6 +26,10 @@ Hello, I am Jiang Zhenyu (CYJiang), a code enthusiast with a passion for open so
 - GitHub: https://github.com/googs1025
 - WeChat: googs1025
 
+## Contributed
+
+![Repos I contributed to](https://github-contrib-stats.vercel.app/googs1025/contributed.svg)
+
 ## Chinese
 
 ## 关于我
