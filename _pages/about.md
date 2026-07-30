@@ -40,7 +40,7 @@ I currently work on cloud native infrastructure at Mashang Consumer Finance. Pre
 <div class='paper-box-image'>
 <div>
 <div class="badge">Community</div>
-<img src='../images/500x300.png' alt="Kubernetes community preview" width="100%">
+<img src='../images/500x300.png' alt="" width="100%">
 </div>
 </div>
 <div class='paper-box-text' markdown="1">
@@ -57,7 +57,7 @@ I currently work on cloud native infrastructure at Mashang Consumer Finance. Pre
 <div class='paper-box-image'>
 <div>
 <div class="badge">GitHub</div>
-<img src='../images/500x300.png' alt="Aibrix project preview" width="100%">
+<img src='../images/500x300.png' alt="" width="100%">
 </div>
 </div>
 <div class='paper-box-text' markdown="1">
@@ -74,7 +74,7 @@ I currently work on cloud native infrastructure at Mashang Consumer Finance. Pre
 <div class='paper-box-image'>
 <div>
 <div class="badge">Community</div>
-<img src='../images/500x300.png' alt="Volcano community preview" width="100%">
+<img src='../images/500x300.png' alt="" width="100%">
 </div>
 </div>
 <div class='paper-box-text' markdown="1">
@@ -91,12 +91,12 @@ I currently work on cloud native infrastructure at Mashang Consumer Finance. Pre
 <div class='paper-box-image'>
 <div>
 <div class="badge">Reviewer</div>
-<img src='../images/500x300.png' alt="Kubernetes SIG Scheduling reviews preview" width="100%">
+<img src='../images/500x300.png' alt="" width="100%">
 </div>
 </div>
 <div class='paper-box-text' markdown="1">
 
-Kubernetes SIG Scheduling Reviews
+[Kubernetes SIG Scheduling Reviews](https://github.com/kubernetes-sigs/scheduler-plugins)
 
 - **Reviewer**
 - Review and discuss scheduling ecosystem changes in [descheduler](https://github.com/kubernetes-sigs/descheduler) and [scheduler-plugins](https://github.com/kubernetes-sigs/scheduler-plugins).
