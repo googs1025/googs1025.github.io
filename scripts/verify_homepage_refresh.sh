@@ -33,6 +33,18 @@ paper_box_count="$(
   awk \
     -v wrapper_class="$homepage_refresh_class" \
     -v card_class="$paper_box_class" '
+      function occurrences(input, pattern, rest, count) {
+        rest = input
+        count = 0
+
+        while (match(rest, pattern)) {
+          count++
+          rest = substr(rest, RSTART + RLENGTH)
+        }
+
+        return count
+      }
+
       $0 ~ wrapper_class {
         in_homepage = 1
       }
@@ -41,8 +53,14 @@ paper_box_count="$(
         count++
       }
 
-      in_homepage && $0 ~ /^[[:space:]]*<\/div>[[:space:]]*$/ {
-        in_homepage = 0
+      in_homepage {
+        depth += occurrences($0, /<div([[:space:]>]|$)/)
+        depth -= occurrences($0, /<\/div>/)
+
+        if (depth <= 0) {
+          in_homepage = 0
+          depth = 0
+        }
       }
 
       END {
