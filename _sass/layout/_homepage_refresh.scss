@@ -1,12 +1,12 @@
-.homepage-intro {
+.homepage-refresh .homepage-intro {
   margin-bottom: 1.5em;
 }
 
-.homepage-intro p {
+.homepage-refresh .homepage-intro p {
   margin-bottom: 0.75em;
 }
 
-.topic-list {
+.homepage-refresh .topic-list {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5em;
@@ -15,14 +15,14 @@
   list-style: none;
 }
 
-.topic-list li {
+.homepage-refresh .topic-list li {
   border: 1px solid #d9e2ef;
   border-radius: 4px;
   padding: 0.35em 0.65em;
   background: #f7f9fc;
 }
 
-.paper-box {
+.homepage-refresh .paper-box {
   display: flex;
   align-items: center;
   flex-direction: row;
@@ -31,19 +31,19 @@
   padding: 1.75em 0;
 }
 
-.paper-box-image {
+.homepage-refresh .paper-box-image {
   display: flex;
   justify-content: center;
   width: 100%;
   order: 2;
 }
 
-.paper-box-image > div {
+.homepage-refresh .paper-box-image > div {
   position: relative;
   width: 100%;
 }
 
-.paper-box-image img {
+.homepage-refresh .paper-box-image img {
   width: 100%;
   max-width: 100%;
   border: 1px solid #e5e9f0;
@@ -51,17 +51,17 @@
   object-fit: cover;
 }
 
-.paper-box-text {
+.homepage-refresh .paper-box-text {
   max-width: 100%;
   order: 1;
 }
 
-.paper-box-text p,
-.paper-box-text ul {
+.homepage-refresh .paper-box-text p,
+.homepage-refresh .paper-box-text ul {
   margin-bottom: 0.6em;
 }
 
-.paper-box .badge {
+.homepage-refresh .paper-box .badge {
   position: absolute;
   margin-top: 0.5em;
   margin-left: -0.5em;
@@ -73,7 +73,7 @@
 }
 
 $scroll_offset: 2em;
-.homepage-intro .anchor:before {
+.homepage-refresh .homepage-intro .anchor:before {
   content: "";
   display: block;
   position: relative;
@@ -83,14 +83,14 @@ $scroll_offset: 2em;
 }
 
 @include breakpoint($medium) {
-  .paper-box-image {
+  .homepage-refresh .paper-box-image {
     justify-content: flex-start;
     min-width: 180px;
     max-width: 32%;
     order: 1;
   }
 
-  .paper-box-text {
+  .homepage-refresh .paper-box-text {
     max-width: 68%;
     padding-left: 1.5em;
     order: 2;
