@@ -21,12 +21,15 @@ for section in "${required_sections[@]}"; do
   fi
 done
 
-if ! grep -Eq "class=(\"|')homepage-refresh(\"|')" "$about_file"; then
-  echo 'Missing homepage wrapper class: class="homepage-refresh"' >&2
+homepage_refresh_class="class[[:space:]]*=[[:space:]]*\"([^\"]*[[:space:]])?homepage-refresh([[:space:]][^\"]*)?\"|class[[:space:]]*=[[:space:]]*'([^']*[[:space:]])?homepage-refresh([[:space:]][^']*)?'"
+paper_box_class="class[[:space:]]*=[[:space:]]*\"([^\"]*[[:space:]])?paper-box([[:space:]][^\"]*)?\"|class[[:space:]]*=[[:space:]]*'([^']*[[:space:]])?paper-box([[:space:]][^']*)?'"
+
+if ! grep -Eq "$homepage_refresh_class" "$about_file"; then
+  echo "Missing homepage wrapper class token: homepage-refresh" >&2
   exit 1
 fi
 
-paper_box_count="$(grep -Fc "class='paper-box'" "$about_file")"
+paper_box_count="$(grep -Ec "$paper_box_class" "$about_file" || true)"
 if [ "$paper_box_count" -lt 4 ]; then
   echo "Expected at least 4 paper-box project/community cards, found $paper_box_count" >&2
   exit 1
@@ -109,7 +112,7 @@ selector_patterns=(
   '.paper-box-image|^[[:space:]]*\.homepage-refresh[[:space:]]+\.paper-box-image([[:space:],>{]|$)'
   '.paper-box-text|^[[:space:]]*\.homepage-refresh[[:space:]]+\.paper-box-text([[:space:],>{]|$)'
   '.badge|^[[:space:]]*\.homepage-refresh[[:space:]]+\.paper-box[[:space:]]+\.badge([[:space:],>{]|$)'
-  '.homepage-intro .anchor:before|^[[:space:]]*\.homepage-refresh[[:space:]]+\.homepage-intro[[:space:]]+\.anchor:before([[:space:],>{]|$)'
+  '.anchor:before|^[[:space:]]*\.homepage-refresh[[:space:]]+\.anchor:before([[:space:],>{]|$)'
 )
 
 for selector_entry in "${selector_patterns[@]}"; do
