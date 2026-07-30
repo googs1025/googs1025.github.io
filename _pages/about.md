@@ -7,60 +7,117 @@ redirect_from:
   - /about.html
 ---
 
+<div class="homepage-refresh" markdown="1">
+
 ## About Me
-Hello, I am Jiang Zhenyu (CYJiang), a code enthusiast with a passion for open source.
 
-- **Areas of Interest**
-  - Cloud Native: **Kubernetes**...
-  - Scheduling: **Volcano**, **Koordinator***, **Scheduler-Plugin**, **Descheduler**, **KAI-Scheduler**...
-  - LLM Inference Platform：**Aibrix**, **llmaz**, **dynamo**, **llm-d**...
-  - LLM Inference Engine：**vLLM**, **SGLang**, ...
-  - GPU Management: **gpu-operator**, **k8s-device-plugin**, **hami**, **dra-driver**...
+<div class="homepage-intro" markdown="1">
+<span class='anchor' id='about-me'></span>
 
-- **Work Experience**
-  - March 2024 - Present: Cloud Native Development Engineer at Mashang Consumer Finance
-  - June 2022 - October 2023: Cloud Platform Engineer at ByteDance
+I am Jiang Zhenyu (CYJiang), a cloud native development engineer focused on Kubernetes scheduling, LLM inference infrastructure, and open source collaboration.
 
-### Community Activities
+I currently work on cloud native infrastructure at Mashang Consumer Finance. Previously, I worked as a cloud platform engineer at ByteDance.
+</div>
 
-- Active participant in the **[Kubernetes community](https://github.com/kubernetes/kubernetes)**
-  - [Kubernetes](https://github.com/kubernetes/kubernetes) member
-  - [Aibrix](https://github.com/vllm-project/aibrix) maintainer
-  - [Volcano](https://github.com/volcano-sh/volcano) member
-  - [InftyAI](https://github.com/InftyAI/llmaz) member
-  - [descheduler](https://github.com/kubernetes-sigs/descheduler) reviewer
-  - [scheduler-plugins](https://github.com/kubernetes-sigs/scheduler-plugins) reviewer
-- Engaged in discussions, proposals, and upstream PR reviews
+## Topics
 
-## Contact Me
+<ul class="topic-list" markdown="1">
+<li markdown="1">Cloud native infrastructure and Kubernetes ecosystem development.</li>
+<li markdown="1">Scheduling systems, including Volcano, descheduler, scheduler-plugins, and related resource orchestration work.</li>
+<li markdown="1">LLM inference platforms and engines, including Aibrix, llmaz, vLLM, SGLang, and llm-d.</li>
+<li markdown="1">GPU management and accelerator-aware workload operations.</li>
+</ul>
+
+## News
+
+- Continue contributing to Kubernetes scheduling and cloud native infrastructure communities through discussions, reviews, and implementation work.
+- Maintain and review open source work around Aibrix, Volcano, descheduler, scheduler-plugins, and LLM inference infrastructure.
+- Share notes from cloud native practice and community collaboration on this site.
+
+## Projects and Communities
+
+<div class='paper-box'>
+<div class='paper-box-image'>
+<div>
+<div class="badge">Community</div>
+<img src='../images/500x300.png' alt="Kubernetes community preview" width="100%">
+</div>
+</div>
+<div class='paper-box-text' markdown="1">
+
+[Kubernetes](https://github.com/kubernetes/kubernetes)
+
+- **Member**
+- Active in upstream community work, discussions, and reviews around cloud native infrastructure.
+
+</div>
+</div>
+
+<div class='paper-box'>
+<div class='paper-box-image'>
+<div>
+<div class="badge">GitHub</div>
+<img src='../images/500x300.png' alt="Aibrix project preview" width="100%">
+</div>
+</div>
+<div class='paper-box-text' markdown="1">
+
+[Aibrix](https://github.com/vllm-project/aibrix)
+
+- **Maintainer**
+- Work on cloud native LLM inference infrastructure for scalable model serving and operations.
+
+</div>
+</div>
+
+<div class='paper-box'>
+<div class='paper-box-image'>
+<div>
+<div class="badge">Community</div>
+<img src='../images/500x300.png' alt="Volcano community preview" width="100%">
+</div>
+</div>
+<div class='paper-box-text' markdown="1">
+
+[Volcano](https://github.com/volcano-sh/volcano)
+
+- **Member**
+- Contribute to batch scheduling and workload orchestration in cloud native environments.
+
+</div>
+</div>
+
+<div class='paper-box'>
+<div class='paper-box-image'>
+<div>
+<div class="badge">Reviewer</div>
+<img src='../images/500x300.png' alt="Kubernetes SIG Scheduling reviews preview" width="100%">
+</div>
+</div>
+<div class='paper-box-text' markdown="1">
+
+Kubernetes SIG Scheduling Reviews
+
+- **Reviewer**
+- Review and discuss scheduling ecosystem changes in [descheduler](https://github.com/kubernetes-sigs/descheduler) and [scheduler-plugins](https://github.com/kubernetes-sigs/scheduler-plugins).
+
+</div>
+</div>
+
+## Contact
 
 - Email: googs1025@gmail.com
-- GitHub: https://github.com/googs1025
+- GitHub: [googs1025](https://github.com/googs1025)
 - WeChat: googs1025
-
-## Contributed
-
-![Repos I contributed to](https://github-contrib-stats.vercel.app/googs1025/contributed.svg)
 
 ## Chinese
 
-## 关于我
-您好，我是江振瑜(CYJiang)，一位热爱开源的码字员
+我是江振瑜（CYJiang），云原生开发工程师，关注 Kubernetes 调度、LLM inference 基础设施和开源协作。目前在马上消费金融从事云原生基础设施工作，此前在字节跳动担任云平台工程师。
 
-- **关注方向(兴趣)**
-- 云原生: kubernetes...
-- 调度方向: **Volcano**, **Koordinator***, **Scheduler-Plugin**, **Descheduler**, **KAI-Scheduler**...
-- LLM推理平台方向：**Aibrix**, **llmaz**, **dynamo**, **llm-d**...
-- LLM推理引擎方向：**vLLM**, **SGLang**, ...
-- GPU管理方向：**gpu-operator**, **k8s-device-plugin**, **hami**, **dra-driver**...
+关注方向：Kubernetes 生态、Volcano、descheduler、scheduler-plugins、Aibrix、llmaz、vLLM、SGLang、llm-d，以及 GPU 管理与推理平台工程。
 
-- **工作经历**  
-  - 2024.3 - 至今：马上消费金融-云原生开发工程师
-  - 2023.10 - 2024.2: 回台军训
-  - 2022.6 - 2023.10：字节跳动-云平台工程师
-  
-## 联系我
+社区工作：Kubernetes Member、Aibrix Maintainer、Volcano Member，并参与 Kubernetes SIG Scheduling 相关项目评审和讨论。
 
-- 邮箱：googs1025@gmail.com
-- GitHub：https://github.com/googs1025
-- VX: googs1025
+联系方式：googs1025@gmail.com / GitHub [googs1025](https://github.com/googs1025) / WeChat googs1025
+
+</div>
