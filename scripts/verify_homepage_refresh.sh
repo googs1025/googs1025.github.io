@@ -40,8 +40,8 @@ for text in \
   fi
 done
 
-if ! grep -Fq "homepage_refresh" "$main_scss"; then
-  echo "assets/css/main.scss does not import homepage_refresh" >&2
+if ! grep -Eq '^[[:space:]]*"layout/homepage_refresh"[[:space:]]*,?[[:space:]]*;?[[:space:]]*$' "$main_scss"; then
+  echo "assets/css/main.scss does not import layout/homepage_refresh" >&2
   exit 1
 fi
 
