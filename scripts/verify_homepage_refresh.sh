@@ -41,9 +41,40 @@ for text in \
 done
 
 if ! awk '
-  {
-    line = $0
+  function active_sass_line(input, line, start, end) {
+    line = input
+
+    while (1) {
+      if (in_block_comment) {
+        end = index(line, "*/")
+        if (!end) {
+          return ""
+        }
+        line = substr(line, end + 2)
+        in_block_comment = 0
+      }
+
+      start = index(line, "/*")
+      if (!start) {
+        break
+      }
+
+      end = index(substr(line, start + 2), "*/")
+      if (!end) {
+        in_block_comment = 1
+        line = substr(line, 1, start - 1)
+        break
+      }
+
+      line = substr(line, 1, start - 1) substr(line, start + end + 3)
+    }
+
     sub(/[[:space:]]*\/\/.*/, "", line)
+    return line
+  }
+
+  {
+    line = active_sass_line($0)
   }
 
   line ~ /^[[:space:]]*@import([[:space:]]|$)/ {
@@ -78,7 +109,51 @@ selector_patterns=(
 for selector_entry in "${selector_patterns[@]}"; do
   selector="${selector_entry%%|*}"
   selector_pattern="${selector_entry#*|}"
-  if ! grep -Eq "$selector_pattern" "$scss_file"; then
+  if ! awk -v selector_pattern="$selector_pattern" '
+    function active_sass_line(input, line, start, end) {
+      line = input
+
+      while (1) {
+        if (in_block_comment) {
+          end = index(line, "*/")
+          if (!end) {
+            return ""
+          }
+          line = substr(line, end + 2)
+          in_block_comment = 0
+        }
+
+        start = index(line, "/*")
+        if (!start) {
+          break
+        }
+
+        end = index(substr(line, start + 2), "*/")
+        if (!end) {
+          in_block_comment = 1
+          line = substr(line, 1, start - 1)
+          break
+        }
+
+        line = substr(line, 1, start - 1) substr(line, start + end + 3)
+      }
+
+      sub(/[[:space:]]*\/\/.*/, "", line)
+      return line
+    }
+
+    {
+      line = active_sass_line($0)
+    }
+
+    line ~ selector_pattern {
+      found = 1
+    }
+
+    END {
+      exit found ? 0 : 1
+    }
+  ' "$scss_file"; then
     echo "Missing homepage style selector: $selector" >&2
     exit 1
   fi
