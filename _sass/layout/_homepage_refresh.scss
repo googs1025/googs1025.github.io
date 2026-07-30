@@ -19,6 +19,7 @@
   border: 1px solid #d9e2ef;
   border-radius: 4px;
   padding: 0.35em 0.65em;
+  color: #243246;
   background: #f7f9fc;
 }
 
@@ -72,14 +73,14 @@
   line-height: 1.5;
 }
 
-$scroll_offset: 2em;
+$homepage-scroll-offset: 2em;
 .homepage-refresh .anchor:before {
   content: "";
   display: block;
   position: relative;
   width: 0;
-  height: $scroll_offset;
-  margin-top: -$scroll_offset;
+  height: $homepage-scroll-offset;
+  margin-top: -$homepage-scroll-offset;
 }
 
 @include breakpoint($medium) {

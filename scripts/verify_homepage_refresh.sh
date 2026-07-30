@@ -29,9 +29,29 @@ if ! grep -Eq "$homepage_refresh_class" "$about_file"; then
   exit 1
 fi
 
-paper_box_count="$(grep -Ec "$paper_box_class" "$about_file" || true)"
+paper_box_count="$(
+  awk \
+    -v wrapper_class="$homepage_refresh_class" \
+    -v card_class="$paper_box_class" '
+      $0 ~ wrapper_class {
+        in_homepage = 1
+      }
+
+      in_homepage && $0 ~ card_class {
+        count++
+      }
+
+      in_homepage && $0 ~ /^[[:space:]]*<\/div>[[:space:]]*$/ {
+        in_homepage = 0
+      }
+
+      END {
+        print count + 0
+      }
+    ' "$about_file"
+)"
 if [ "$paper_box_count" -lt 4 ]; then
-  echo "Expected at least 4 paper-box project/community cards, found $paper_box_count" >&2
+  echo "Expected at least 4 paper-box project/community cards inside homepage-refresh wrapper, found $paper_box_count" >&2
   exit 1
 fi
 
