@@ -40,7 +40,23 @@ for text in \
   fi
 done
 
-if ! grep -Eq '^[[:space:]]*"layout/homepage_refresh"[[:space:]]*,?[[:space:]]*;?[[:space:]]*$' "$main_scss"; then
+if ! awk '
+  /^[[:space:]]*@import([[:space:]]|$)/ {
+    in_import = 1
+  }
+
+  in_import && /"layout\/homepage_refresh"/ {
+    found = 1
+  }
+
+  in_import && /;/ {
+    in_import = 0
+  }
+
+  END {
+    exit found ? 0 : 1
+  }
+' "$main_scss"; then
   echo "assets/css/main.scss does not import layout/homepage_refresh" >&2
   exit 1
 fi
