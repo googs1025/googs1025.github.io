@@ -15,7 +15,7 @@ required_sections=(
 )
 
 for section in "${required_sections[@]}"; do
-  if ! grep -Fq "$section" "$about_file"; then
+  if ! grep -Fxq "$section" "$about_file"; then
     echo "Missing homepage section: $section" >&2
     exit 1
   fi
@@ -41,6 +41,10 @@ for text in \
 done
 
 if ! awk '
+  /^[[:space:]]*\/\// {
+    next
+  }
+
   /^[[:space:]]*@import([[:space:]]|$)/ {
     in_import = 1
   }
