@@ -41,19 +41,20 @@ for text in \
 done
 
 if ! awk '
-  /^[[:space:]]*\/\// {
-    next
+  {
+    line = $0
+    sub(/[[:space:]]*\/\/.*/, "", line)
   }
 
-  /^[[:space:]]*@import([[:space:]]|$)/ {
+  line ~ /^[[:space:]]*@import([[:space:]]|$)/ {
     in_import = 1
   }
 
-  in_import && /"layout\/homepage_refresh"/ {
+  in_import && line ~ /"layout\/homepage_refresh"/ {
     found = 1
   }
 
-  in_import && /;/ {
+  in_import && line ~ /;/ {
     in_import = 0
   }
 
@@ -65,14 +66,19 @@ if ! awk '
   exit 1
 fi
 
-for selector in \
-  ".homepage-intro" \
-  ".topic-list" \
-  ".paper-box" \
-  ".paper-box-image" \
-  ".paper-box-text" \
-  ".badge"; do
-  if ! grep -Fq "$selector" "$scss_file"; then
+selector_patterns=(
+  '.homepage-intro|^[[:space:]]*\.homepage-intro([[:space:],>{]|$)'
+  '.topic-list|^[[:space:]]*\.topic-list([[:space:],>{]|$)'
+  '.paper-box|^[[:space:]]*\.paper-box([[:space:],>{]|$)'
+  '.paper-box-image|^[[:space:]]*\.paper-box-image([[:space:],>{]|$)'
+  '.paper-box-text|^[[:space:]]*\.paper-box-text([[:space:],>{]|$)'
+  '.badge|^[[:space:]]*\.badge([[:space:],>{]|$)'
+)
+
+for selector_entry in "${selector_patterns[@]}"; do
+  selector="${selector_entry%%|*}"
+  selector_pattern="${selector_entry#*|}"
+  if ! grep -Eq "$selector_pattern" "$scss_file"; then
     echo "Missing homepage style selector: $selector" >&2
     exit 1
   fi
