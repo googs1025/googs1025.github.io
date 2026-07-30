@@ -45,7 +45,38 @@ paper_box_count="$(
         return count
       }
 
-      $0 ~ wrapper_class {
+      function homepage_wrapper_tag(input, rest, tag_text) {
+        rest = input
+
+        while (match(rest, /<(div|section|main|article)([[:space:]][^>]*)?>/)) {
+          tag_text = substr(rest, RSTART, RLENGTH)
+
+          if (tag_text ~ wrapper_class) {
+            if (tag_text ~ /^<div([[:space:]>]|$)/) {
+              return "div"
+            }
+            if (tag_text ~ /^<section([[:space:]>]|$)/) {
+              return "section"
+            }
+            if (tag_text ~ /^<main([[:space:]>]|$)/) {
+              return "main"
+            }
+            if (tag_text ~ /^<article([[:space:]>]|$)/) {
+              return "article"
+            }
+          }
+
+          rest = substr(rest, RSTART + RLENGTH)
+        }
+
+        return ""
+      }
+
+      !in_homepage {
+        wrapper_tag = homepage_wrapper_tag($0)
+      }
+
+      wrapper_tag != "" {
         in_homepage = 1
       }
 
@@ -54,12 +85,13 @@ paper_box_count="$(
       }
 
       in_homepage {
-        depth += occurrences($0, /<div([[:space:]>]|$)/)
-        depth -= occurrences($0, /<\/div>/)
+        depth += occurrences($0, "<" wrapper_tag "([[:space:]>]|$)")
+        depth -= occurrences($0, "</" wrapper_tag "[[:space:]]*>")
 
         if (depth <= 0) {
           in_homepage = 0
           depth = 0
+          wrapper_tag = ""
         }
       }
 
