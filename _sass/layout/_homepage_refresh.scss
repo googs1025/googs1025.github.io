@@ -61,7 +61,7 @@
   margin-bottom: 0.6em;
 }
 
-.badge {
+.paper-box .badge {
   position: absolute;
   margin-top: 0.5em;
   margin-left: -0.5em;
@@ -73,8 +73,7 @@
 }
 
 $scroll_offset: 2em;
-h1:before,
-.anchor:before {
+.homepage-intro .anchor:before {
   content: "";
   display: block;
   position: relative;

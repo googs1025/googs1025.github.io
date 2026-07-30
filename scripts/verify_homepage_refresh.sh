@@ -103,7 +103,7 @@ selector_patterns=(
   '.paper-box|^[[:space:]]*\.paper-box([[:space:],>{]|$)'
   '.paper-box-image|^[[:space:]]*\.paper-box-image([[:space:],>{]|$)'
   '.paper-box-text|^[[:space:]]*\.paper-box-text([[:space:],>{]|$)'
-  '.badge|^[[:space:]]*\.badge([[:space:],>{]|$)'
+  '.badge|^[[:space:]]*\.paper-box[[:space:]]+\.badge([[:space:],>{]|$)'
 )
 
 for selector_entry in "${selector_patterns[@]}"; do
