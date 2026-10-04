@@ -1,0 +1,41 @@
+<button
+  type="button"
+  class="icon-button"
+  aria-label="切换颜色主题"
+  aria-pressed="false"
+  title="切换到深色主题"
+  data-theme-toggle
+>
+  <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20">
+    <path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.64 5.64l1.42 1.42M16.94 16.94l1.42 1.42M18.36 5.64l-1.42 1.42M7.06 16.94l-1.42 1.42"></path>
+    <circle cx="12" cy="12" r="4"></circle>
+  </svg>
+</button>
+
+<script>
+  const updateControls = (theme: "light" | "dark") => {
+    document.querySelector('meta[name="theme-color"]')?.setAttribute(
+      "content",
+      theme === "dark" ? "#0d0f10" : "#ffffff",
+    );
+    document.querySelectorAll<HTMLElement>("[data-theme-toggle]").forEach((button) => {
+      const isDark = theme === "dark";
+      button.setAttribute("aria-pressed", String(isDark));
+      button.setAttribute("title", isDark ? "切换到浅色主题" : "切换到深色主题");
+    });
+  };
+
+  const initialTheme = document.documentElement.dataset.theme === "dark" ? "dark" : "light";
+  updateControls(initialTheme);
+
+  document.querySelectorAll<HTMLElement>("[data-theme-toggle]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+      document.documentElement.dataset.theme = next;
+      updateControls(next);
+      try {
+        localStorage.setItem("theme", next);
+      } catch {}
+    });
+  });
+</script>

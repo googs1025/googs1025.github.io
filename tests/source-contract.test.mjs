@@ -17,3 +17,17 @@ test("Astro targets the production site and package scripts verify it", async ()
     "npm test && npm run check && npm run build && node scripts/verify-build.mjs",
   );
 });
+
+test("site shell exposes accessible navigation and motion preferences", async () => {
+  const [layout, header, toggle, styles] = await Promise.all([
+    read("src/layouts/BaseLayout.astro"),
+    read("src/components/Header.astro"),
+    read("src/components/ThemeToggle.astro"),
+    read("src/styles/global.css"),
+  ]);
+
+  assert.match(layout, /href=["']#main-content["']/);
+  assert.match(header, /aria-label=["']主导航["']/);
+  assert.match(toggle, /aria-label=["']切换颜色主题["']/);
+  assert.match(styles, /prefers-reduced-motion\s*:\s*reduce/);
+});

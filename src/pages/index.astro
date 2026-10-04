@@ -1,17 +1,10 @@
 ---
-import { SITE } from "@/data/site";
+import BaseLayout from "@/layouts/BaseLayout.astro";
 ---
 
-<!doctype html>
-<html lang="zh-Hans">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
-    <title>{SITE.title}</title>
-  </head>
-  <body>
-    <main>
-      <h1>{SITE.title}</h1>
-    </main>
-  </body>
-</html>
+<BaseLayout>
+  <section class="content" aria-labelledby="page-title">
+    <h1 id="page-title">文章</h1>
+    <p>记录 Kubernetes 调度、云原生基础设施与 LLM 推理平台实践。</p>
+  </section>
+</BaseLayout>
