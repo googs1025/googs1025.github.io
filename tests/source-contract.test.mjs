@@ -10,7 +10,11 @@ test("Astro targets the production site and package scripts verify it", async ()
   const pkg = JSON.parse(await read("package.json"));
 
   assert.match(config, /site:\s*["']https:\/\/googs1025\.github\.io["']/);
-  assert.match(config, /sitemap\(\)/);
+  assert.match(config, /sitemap\(\{[\s\S]*filter:/);
+  assert.match(
+    config,
+    /\/posts\/2025\/06\/14\/kubecon-2025-experience\//,
+  );
   assert.equal(pkg.scripts.test, "node --test tests/*.test.mjs");
   assert.equal(
     pkg.scripts.build,
@@ -138,6 +142,30 @@ test("post layout renders semantic, indexed article content and optional navigat
   );
   assert.match(layout, /<nav\s+class=["']post-navigation["']\s+aria-label=["']文章导航["']/);
   assert.match(layout, /previous\s*\|\|\s*next/);
+});
+
+test("base and post layouts emit typed Open Graph article metadata", async () => {
+  const [baseLayout, postLayout] = await Promise.all([
+    read("src/layouts/BaseLayout.astro"),
+    read("src/layouts/PostLayout.astro"),
+  ]);
+
+  assert.match(baseLayout, /ogType\?:\s*["']website["']\s*\|\s*["']article["']/);
+  assert.match(baseLayout, /ogType\s*=\s*["']website["']/);
+  assert.match(baseLayout, /property=["']og:type["']\s+content=\{ogType\}/);
+  assert.match(baseLayout, /property=["']article:published_time["']/);
+  assert.match(baseLayout, /property=["']article:modified_time["']/);
+  assert.match(postLayout, /ogType=["']article["']/);
+  assert.match(postLayout, /articlePublishedTime=\{data\.pubDate\.toISOString\(\)\}/);
+  assert.match(postLayout, /articleModifiedTime=\{modifiedTime\}/);
+});
+
+test("content schema rejects an update before publication", async () => {
+  const config = await read("src/content.config.ts");
+
+  assert.match(config, /isUpdatedDateOnOrAfterPubDate/);
+  assert.match(config, /updatedDate must be on or after pubDate/);
+  assert.match(config, /path:\s*\[["']updatedDate["']\]/);
 });
 
 test("table of contents keeps second and third level headings and hides short outlines", async () => {

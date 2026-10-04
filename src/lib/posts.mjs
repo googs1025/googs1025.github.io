@@ -94,7 +94,7 @@ function utcCalendarDate(date) {
 
 export function hasMeaningfulUpdate(pubDate, updatedDate) {
   return Boolean(
-    updatedDate && utcCalendarDate(updatedDate) !== utcCalendarDate(pubDate),
+    updatedDate && utcCalendarDate(updatedDate) > utcCalendarDate(pubDate),
   );
 }
 

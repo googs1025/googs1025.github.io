@@ -22,11 +22,21 @@ const dateFormatter = new Intl.DateTimeFormat("zh-CN", {
   timeZone: "UTC",
 });
 const showUpdatedDate = hasMeaningfulUpdate(data.pubDate, data.updatedDate);
+const modifiedTime = showUpdatedDate && data.updatedDate
+  ? data.updatedDate.toISOString()
+  : undefined;
 const postHref = (entry: CollectionEntry<"blog">) =>
   entry.data.canonicalURL ?? `/posts/${entry.id}/`;
 ---
 
-<BaseLayout title={data.title} description={data.description} canonical={canonical}>
+<BaseLayout
+  title={data.title}
+  description={data.description}
+  canonical={canonical}
+  ogType="article"
+  articlePublishedTime={data.pubDate.toISOString()}
+  articleModifiedTime={modifiedTime}
+>
   <div class="content post-page">
     <header class="post-header">
       <h1>{data.title}</h1>

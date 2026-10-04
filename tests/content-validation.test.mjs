@@ -4,6 +4,7 @@ import test from "node:test";
 import {
   isHttpUrl,
   isLegacyPath,
+  isUpdatedDateOnOrAfterPubDate,
 } from "../src/lib/content-validation.mjs";
 
 test("isHttpUrl accepts absolute HTTP and HTTPS URLs", () => {
@@ -59,4 +60,34 @@ test("isLegacyPath rejects external, malformed, and traversal paths", () => {
   ]) {
     assert.equal(isLegacyPath(value), false, JSON.stringify(value));
   }
+});
+
+test("post dates accept an absent, equal, or later update", () => {
+  const pubDate = new Date("2025-06-14T12:00:00.000Z");
+
+  assert.equal(isUpdatedDateOnOrAfterPubDate(pubDate, undefined), true);
+  assert.equal(
+    isUpdatedDateOnOrAfterPubDate(
+      pubDate,
+      new Date("2025-06-14T12:00:00.000Z"),
+    ),
+    true,
+  );
+  assert.equal(
+    isUpdatedDateOnOrAfterPubDate(
+      pubDate,
+      new Date("2025-06-15T00:00:00.000Z"),
+    ),
+    true,
+  );
+});
+
+test("post dates reject an update before publication", () => {
+  assert.equal(
+    isUpdatedDateOnOrAfterPubDate(
+      new Date("2025-06-14T12:00:00.000Z"),
+      new Date("2025-06-14T11:59:59.999Z"),
+    ),
+    false,
+  );
 });

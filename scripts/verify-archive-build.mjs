@@ -4,7 +4,16 @@ import { readFile } from "node:fs/promises";
 const readDist = (path) =>
   readFile(new URL(`../dist/${path}`, import.meta.url), "utf8");
 
-const [home, blog, cloudNative, openSource, post, legacyPost, pagefindEntry] =
+const [
+  home,
+  blog,
+  cloudNative,
+  openSource,
+  post,
+  legacyPost,
+  pagefindEntry,
+  sitemap,
+] =
   await Promise.all([
     readDist("index.html"),
     readDist("blog/index.html"),
@@ -13,6 +22,7 @@ const [home, blog, cloudNative, openSource, post, legacyPost, pagefindEntry] =
     readDist("posts/kubecon-china-2025/index.html"),
     readDist("posts/2025/06/14/kubecon-2025-experience/index.html"),
     readDist("pagefind/pagefind-entry.json"),
+    readDist("sitemap-0.xml"),
   ]);
 
 for (const html of [home, blog, cloudNative, openSource]) {
@@ -26,6 +36,7 @@ for (const html of [home, blog, cloudNative, openSource]) {
     html,
     /href="\/categories\/%E4%BA%91%E5%8E%9F%E7%94%9F\/"/,
   );
+  assert.match(html, /<meta property="og:type" content="website">/);
 }
 
 assert.match(cloudNative, /<h1 id="page-title">分类：云原生<\/h1>/);
@@ -40,6 +51,12 @@ assert.match(
   post,
   /<link rel="canonical" href="https:\/\/googs1025\.github\.io\/posts\/kubecon-china-2025\/">/,
 );
+assert.match(post, /<meta property="og:type" content="article">/);
+assert.match(
+  post,
+  /<meta property="article:published_time" content="2025-06-14T00:00:00\.000Z">/,
+);
+assert.doesNotMatch(post, /property="article:modified_time"/);
 assert.match(post, /<nav class="toc" aria-label="本文目录">/);
 assert.match(post, /<article class="prose" data-pagefind-body>/);
 assert.match(post, /src="\/images\/kubecon2025\/img_13\.png"/);
@@ -60,6 +77,16 @@ assert.match(
 assert.match(
   legacyPost,
   /<a href="\/posts\/kubecon-china-2025\/">继续阅读<\/a>/,
+);
+assert.match(legacyPost, /<meta property="og:type" content="website">/);
+
+assert.match(
+  sitemap,
+  /<loc>https:\/\/googs1025\.github\.io\/posts\/kubecon-china-2025\/<\/loc>/,
+);
+assert.doesNotMatch(
+  sitemap,
+  /<loc>https:\/\/googs1025\.github\.io\/posts\/2025\/06\/14\/kubecon-2025-experience\/<\/loc>/,
 );
 
 assert.equal(JSON.parse(pagefindEntry).languages["zh-hans"].page_count, 1);

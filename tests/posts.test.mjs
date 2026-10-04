@@ -222,3 +222,13 @@ test("hasMeaningfulUpdate detects the next UTC calendar day", () => {
     true,
   );
 });
+
+test("hasMeaningfulUpdate suppresses an update before the publication UTC day", () => {
+  assert.equal(
+    hasMeaningfulUpdate(
+      new Date("2025-06-14T01:00:00.000Z"),
+      new Date("2025-06-13T23:00:00.000Z"),
+    ),
+    false,
+  );
+});

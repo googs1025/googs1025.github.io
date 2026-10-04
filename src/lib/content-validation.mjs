@@ -59,3 +59,7 @@ export function isLegacyPath(value) {
 
   return false;
 }
+
+export function isUpdatedDateOnOrAfterPubDate(pubDate, updatedDate) {
+  return !updatedDate || updatedDate.getTime() >= pubDate.getTime();
+}
