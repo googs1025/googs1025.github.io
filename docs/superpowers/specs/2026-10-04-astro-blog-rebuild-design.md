@@ -23,7 +23,7 @@ Use a blog-first structure:
 - `Home`: latest posts in reverse chronological order.
 - `Blog`: complete post archive, pagination, categories, and search.
 - `About`: profile, technical interests, open source roles, social links, and contact details.
-- `CV`: the existing real resume content presented in the new visual system.
+- `CV`: a concise professional profile built only from verified facts already present in the site.
 - Post pages: focused long-form reading with a table of contents, code highlighting, and previous/next navigation.
 
 The main navigation is `Home / Blog / About / CV`. Academic Pages demo areas such as Publications, Talks, Teaching, Portfolio, and Guide are not part of the new site.
@@ -134,7 +134,7 @@ The About page presents a compact profile rather than a second homepage. It incl
 
 ### CV and utility pages
 
-The CV page preserves real resume information and adopts the same typography and theme tokens. The 404 page includes the normal header, a concise message, and paths back to Home and Blog.
+The current Jekyll CV sources contain Academic Pages demonstration data rather than the site owner's resume. The new CV page therefore uses only verified facts already present in the site: identity, current cloud native engineering focus, previous ByteDance cloud platform experience, technical areas, and established open source roles. It must not invent dates, education, employers, titles, or achievements that are not supported by the source content. The 404 page includes the normal header, a concise message, and paths back to Home and Blog.
 
 ## Content Migration
 
@@ -143,7 +143,7 @@ Migrate only authentic site content:
 - The existing KubeCon China 2025 post and its images.
 - Current personal biography and verified links.
 - Profile imagery that belongs to the site owner.
-- Existing real CV content.
+- Verified professional facts from the current homepage and site configuration.
 
 Do not migrate demo publications, talks, teaching entries, portfolio examples, placeholder images, sample comments, or Academic Pages documentation pages.
 
