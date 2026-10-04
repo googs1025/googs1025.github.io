@@ -31,3 +31,16 @@ test("site shell exposes accessible navigation and motion preferences", async ()
   assert.match(toggle, /aria-label=["']切换颜色主题["']/);
   assert.match(styles, /prefers-reduced-motion\s*:\s*reduce/);
 });
+
+test("site header stays visible with a translucent token-based surface", async () => {
+  const styles = await read("src/styles/global.css");
+  const siteHeader = styles.match(/\.site-header\s*\{([^}]*)\}/s)?.[1] ?? "";
+
+  assert.match(siteHeader, /position:\s*sticky/);
+  assert.match(siteHeader, /top:\s*0/);
+  assert.match(
+    siteHeader,
+    /background:\s*color-mix\([^;]*var\(--background\)[^;]*transparent[^;]*\)/,
+  );
+  assert.match(siteHeader, /(?:-webkit-)?backdrop-filter:\s*blur\(/);
+});
