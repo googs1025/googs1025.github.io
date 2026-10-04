@@ -1,79 +1,65 @@
 ---
+import { PROFILE } from "@/data/profile.mjs";
+import { SITE } from "@/data/site";
 import BaseLayout from "@/layouts/BaseLayout.astro";
+
+const emailHref = `mailto:${SITE.email}`;
 ---
 
 <BaseLayout
   title="CV"
-  description="江振瑜（CYJiang）的工作经历、开源角色与技术方向。"
+  description={`${PROFILE.identity.name}（${PROFILE.identity.latinName}）的工作经历、开源角色与技术方向。`}
 >
   <article class="content cv-page">
     <header class="cv-header">
       <p class="profile-label">Curriculum Vitae</p>
-      <h1>江振瑜</h1>
-      <p class="profile-handle">CYJiang · @googs1025</p>
+      <h1>{PROFILE.identity.name}</h1>
+      <p class="profile-handle">
+        {PROFILE.identity.latinName} · {PROFILE.identity.handle}
+      </p>
     </header>
 
     <section class="cv-section" aria-labelledby="cv-summary">
       <h2 id="cv-summary">Professional Summary / 专业概览</h2>
-      <p>
-        云原生开发与基础设施工程师，专注 Kubernetes 调度、GPU
-        资源管理与 LLM 推理基础设施。目前在马上消费金融从事云原生基础设施相关工作。
-      </p>
+      <p>{PROFILE.identity.summary}</p>
     </section>
 
     <section class="cv-section" aria-labelledby="cv-experience">
       <h2 id="cv-experience">Experience / 工作经历</h2>
-      <div class="cv-entry">
-        <h3>马上消费金融</h3>
-        <p>从事云原生基础设施相关工作。</p>
-      </div>
-      <div class="cv-entry">
-        <h3>ByteDance</h3>
-        <p>曾任云平台工程师。</p>
-      </div>
+      {PROFILE.experience.map((item) => (
+        <div class="cv-entry">
+          <h3>{item.organization}</h3>
+          <p>{item.summary}</p>
+        </div>
+      ))}
     </section>
 
     <section class="cv-section" aria-labelledby="cv-open-source">
       <h2 id="cv-open-source">Open Source / 开源经历</h2>
       <ul class="role-list">
-        <li>
-          <a href="https://github.com/kubernetes/kubernetes">Kubernetes</a>
-          {" "}Member
-        </li>
-        <li>
-          <a href="https://github.com/vllm-project/aibrix">Aibrix</a>
-          {" "}Maintainer
-        </li>
-        <li>
-          <a href="https://github.com/volcano-sh/volcano">Volcano</a>
-          {" "}Member
-        </li>
-        <li>
-          围绕
-          <a href="https://github.com/kubernetes-sigs/scheduler-plugins"
-            >scheduler-plugins</a
-          >
-          与
-          <a href="https://github.com/kubernetes-sigs/descheduler">descheduler</a>
-          参与工作、讨论和代码评审。
-        </li>
+        {PROFILE.openSourceRoles.map((item) => (
+          <li>
+            <a href={item.url}>{item.project}</a>{" "}{item.role}
+          </li>
+        ))}
+        {PROFILE.collaborations.map((item) => (
+          <li><a href={item.url}>{item.project}</a>：{item.activity}</li>
+        ))}
       </ul>
     </section>
 
     <section class="cv-section" aria-labelledby="cv-focus">
       <h2 id="cv-focus">Technical Focus / 技术方向</h2>
       <ul class="fact-list">
-        <li>Kubernetes 调度</li>
-        <li>GPU 资源管理</li>
-        <li>LLM 推理基础设施</li>
+        {PROFILE.technicalFocus.map((focus) => <li>{focus}</li>)}
       </ul>
     </section>
 
     <section class="cv-section" aria-labelledby="cv-contact">
       <h2 id="cv-contact">Contact / 联系方式</h2>
       <ul class="contact-list">
-        <li><a href="https://github.com/googs1025">GitHub · googs1025</a></li>
-        <li><a href="mailto:googs1025@gmail.com">googs1025@gmail.com</a></li>
+        <li><a href={SITE.github}>GitHub · {SITE.handle.replace(/^@/, "")}</a></li>
+        <li><a href={emailHref}>{SITE.email}</a></li>
       </ul>
     </section>
   </article>

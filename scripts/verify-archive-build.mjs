@@ -1,8 +1,19 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
+import { PROFILE } from "../src/data/profile.mjs";
+
 const readDist = (path) =>
   readFile(new URL(`../dist/${path}`, import.meta.url), "utf8");
+
+const escapeRegExp = (value) =>
+  value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+const profileMain = (html) => {
+  const main = html.match(/<main[^>]*>([\s\S]*?)<\/main>/)?.[1];
+  assert.ok(main, "expected profile content inside main");
+  return main;
+};
 
 const [
   home,
@@ -89,16 +100,35 @@ assert.match(
 assert.match(legacyPost, /<meta property="og:type" content="website">/);
 
 for (const html of [about, cv]) {
-  for (const fact of [
-    "江振瑜",
-    "Kubernetes",
-    "Aibrix",
-    "Volcano",
-    "ByteDance",
-    "googs1025@gmail.com",
-    "马上消费金融",
-  ]) {
-    assert.match(html, new RegExp(fact));
+  const main = profileMain(html);
+
+  assert.match(main, new RegExp(escapeRegExp(PROFILE.identity.name)));
+  assert.match(main, new RegExp(escapeRegExp(PROFILE.identity.summary)));
+
+  for (const experience of PROFILE.experience) {
+    assert.match(main, new RegExp(escapeRegExp(experience.summary)));
+  }
+
+  for (const focus of PROFILE.technicalFocus) {
+    assert.match(main, new RegExp(`<li>${escapeRegExp(focus)}</li>`));
+  }
+
+  for (const role of PROFILE.openSourceRoles) {
+    assert.match(
+      main,
+      new RegExp(
+        `<a href="${escapeRegExp(role.url)}">${escapeRegExp(role.project)}</a> ${escapeRegExp(role.role)}`,
+      ),
+    );
+  }
+
+  for (const collaboration of PROFILE.collaborations) {
+    assert.match(
+      main,
+      new RegExp(
+        `<a href="${escapeRegExp(collaboration.url)}">${escapeRegExp(collaboration.project)}</a>：${escapeRegExp(collaboration.activity)}`,
+      ),
+    );
   }
 
   for (const forbidden of [
@@ -107,18 +137,25 @@ for (const html of [about, cv]) {
     "Skill 1",
     "Professor Hub",
     "academicpages",
+    "Second University",
+    "First University",
   ]) {
-    assert.doesNotMatch(html, new RegExp(forbidden, "i"));
+    assert.doesNotMatch(main, new RegExp(forbidden, "i"));
   }
 
-  assert.match(html, />Kubernetes<\/a> Member/);
-  assert.match(html, />Aibrix<\/a> Maintainer/);
-  assert.match(html, />Volcano<\/a> Member/);
+  assert.doesNotMatch(main, /\b(?:19|20)\d{2}\b/);
+  assert.doesNotMatch(
+    main,
+    /education|award|publication|professor|senior|staff|principal|lead|高级|资深|负责人/i,
+  );
+  assert.doesNotMatch(main, /\b\d+(?:\.\d+)?%/);
 }
 
 assert.match(about, /<img[^>]+src="\/images\/profile\.jpg"[^>]+alt="江振瑜"/);
 assert.ok(profileImage.byteLength > 0, "expected the profile image in dist");
 assert.match(notFound, /<h1[^>]*>页面未找到<\/h1>/);
+assert.match(notFound, /<meta name="robots" content="noindex,nofollow">/);
+assert.doesNotMatch(notFound, /<link rel="canonical"/);
 assert.match(notFound, /href="\/"/);
 assert.match(notFound, /href="\/blog\/"/);
 

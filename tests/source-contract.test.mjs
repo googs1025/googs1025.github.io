@@ -160,6 +160,54 @@ test("base and post layouts emit typed Open Graph article metadata", async () =>
   assert.match(postLayout, /articleModifiedTime=\{modifiedTime\}/);
 });
 
+test("base layout can omit canonical metadata and mark error pages noindex", async () => {
+  const [baseLayout, notFoundPage] = await Promise.all([
+    read("src/layouts/BaseLayout.astro"),
+    read("src/pages/404.astro"),
+  ]);
+
+  assert.match(baseLayout, /canonical\?:\s*URL\s*\|\s*string\s*\|\s*false/);
+  assert.match(baseLayout, /noindex\?:\s*boolean/);
+  assert.match(baseLayout, /canonical\s*===\s*false\s*\?\s*undefined/);
+  assert.match(
+    baseLayout,
+    /canonicalURL\s*&&\s*<link\s+rel=["']canonical["']/,
+  );
+  assert.match(
+    baseLayout,
+    /noindex\s*&&\s*<meta\s+name=["']robots["']\s+content=["']noindex,nofollow["']/,
+  );
+  assert.match(notFoundPage, /canonical=\{false\}/);
+  assert.match(notFoundPage, /\bnoindex\b/);
+});
+
+test("print styles force light colors and expose external destinations", async () => {
+  const styles = await read("src/styles/global.css");
+  const printStyles = styles.slice(styles.indexOf("@media print"));
+
+  assert.match(
+    printStyles,
+    /:root\s*,\s*:root\[data-theme=["']dark["']\]\s*\{[\s\S]*color-scheme:\s*light[\s\S]*--background:\s*#fff[\s\S]*--foreground:\s*#000[\s\S]*--muted:[^;]+;[\s\S]*--border:[^;]+;[\s\S]*--accent:[^;]+;/,
+  );
+  assert.match(
+    printStyles,
+    /body\s*\{[^}]*background:\s*#fff[^}]*color:\s*#000/s,
+  );
+  assert.match(
+    printStyles,
+    /\.cv-page a\[href\^=["']http:\/\/["']\]::after/,
+  );
+  assert.match(
+    printStyles,
+    /\.cv-page a\[href\^=["']https:\/\/["']\]::after/,
+  );
+  assert.match(
+    printStyles,
+    /content:\s*["'] \(["']\s*attr\(href\)\s*["']\)["']/,
+  );
+  assert.doesNotMatch(printStyles, /a\[href\^=["']mailto:/);
+});
+
 test("content schema rejects an update before publication", async () => {
   const config = await read("src/content.config.ts");
 
