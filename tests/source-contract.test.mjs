@@ -126,3 +126,54 @@ test("category pages derive exact published categories and share the post list",
   assert.match(categoryPage, /分类：\{category\}/);
   assert.match(categoryPage, /<PostList\s+posts=/);
 });
+
+test("post layout renders semantic, indexed article content and optional navigation", async () => {
+  const layout = await read("src/layouts/PostLayout.astro");
+
+  assert.match(layout, /<TableOfContents\s+headings=\{headings\}/);
+  assert.match(layout, /<time\s+datetime=/);
+  assert.match(
+    layout,
+    /<article\s+class=["']prose["']\s+data-pagefind-body>/,
+  );
+  assert.match(layout, /<nav\s+class=["']post-navigation["']\s+aria-label=["']文章导航["']/);
+  assert.match(layout, /previous\s*\|\|\s*next/);
+});
+
+test("table of contents keeps second and third level headings and hides short outlines", async () => {
+  const toc = await read("src/components/TableOfContents.astro");
+
+  assert.match(toc, /MarkdownHeading\[\]/);
+  assert.match(toc, /heading\.depth\s*===\s*2\s*\|\|\s*heading\.depth\s*===\s*3/);
+  assert.match(toc, /eligibleHeadings\.length\s*>=\s*2/);
+  assert.match(toc, /<nav\s+class=["']toc["']\s+aria-label=["']本文目录["']/);
+  assert.match(toc, /href=\{`#\$\{heading\.slug\}`\}/);
+  assert.doesNotMatch(toc, /set:html|innerHTML/);
+});
+
+test("post routes render local published entries with deterministic adjacent posts", async () => {
+  const page = await read("src/pages/posts/[...slug].astro");
+
+  assert.match(page, /getCollection\(["']blog["']\)/);
+  assert.match(page, /publishedPosts\(/);
+  assert.match(page, /!post\.data\.canonicalURL/);
+  assert.match(page, /adjacentPosts\(/);
+  assert.match(page, /params:\s*\{\s*slug:\s*post\.id\s*\}/);
+  assert.match(page, /await\s+render\(post\)/);
+  assert.match(page, /<PostLayout[^>]*post=\{post\}[^>]*headings=\{headings\}/s);
+  assert.match(page, /<Content\s*\/>/);
+});
+
+test("legacy KubeCon URL declares the destination and a visible fallback link", async () => {
+  const [legacyPage, baseLayout] = await Promise.all([
+    read("src/pages/posts/2025/06/14/kubecon-2025-experience/index.astro"),
+    read("src/layouts/BaseLayout.astro"),
+  ]);
+
+  assert.match(legacyPage, /destination\s*=\s*["']\/posts\/kubecon-china-2025\/["']/);
+  assert.match(legacyPage, /canonical=\{canonicalURL\}/);
+  assert.match(legacyPage, /http-equiv=["']refresh["']/);
+  assert.match(legacyPage, /href=\{destination\}/);
+  assert.match(legacyPage, />继续阅读<\/a>/);
+  assert.match(baseLayout, /<slot\s+name=["']head["']\s*\/>/);
+});

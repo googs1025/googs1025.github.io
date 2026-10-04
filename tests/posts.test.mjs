@@ -3,7 +3,7 @@ import test from "node:test";
 
 import * as postsModule from "../src/lib/posts.mjs";
 
-const { paginatePosts, publishedPosts } = postsModule;
+const { adjacentPosts, paginatePosts, publishedPosts } = postsModule;
 
 const syntheticPosts = (count) =>
   Array.from({ length: count }, (_, index) => ({
@@ -163,4 +163,37 @@ test("archive navigation points page two homeward and later pages numerically", 
     { currentPage: 2, previousHref: "/blog/", nextHref: "/blog/3/" },
     { currentPage: 3, previousHref: "/blog/2/", nextHref: undefined },
   ]);
+});
+
+test("adjacentPosts maps previous to older and next to newer in newest-first order", () => {
+  const posts = syntheticPosts(3);
+
+  assert.deepEqual(adjacentPosts(posts, 0), {
+    previous: posts[1],
+    next: undefined,
+  });
+  assert.deepEqual(adjacentPosts(posts, 1), {
+    previous: posts[2],
+    next: posts[0],
+  });
+  assert.deepEqual(adjacentPosts(posts, 2), {
+    previous: undefined,
+    next: posts[1],
+  });
+});
+
+test("adjacentPosts leaves a single post without navigation targets", () => {
+  const posts = syntheticPosts(1);
+
+  assert.deepEqual(adjacentPosts(posts, 0), {
+    previous: undefined,
+    next: undefined,
+  });
+});
+
+test("adjacentPosts rejects an index outside the collection", () => {
+  assert.throws(() => adjacentPosts(syntheticPosts(1), 1), {
+    name: "RangeError",
+    message: "currentIndex must identify a post",
+  });
 });

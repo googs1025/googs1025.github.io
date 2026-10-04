@@ -460,6 +460,117 @@ td {
   color: var(--muted);
 }
 
+.post-page {
+  --reading-measure: 42rem;
+}
+
+.post-header {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.post-header h1 {
+  max-width: var(--reading-measure);
+  margin-bottom: 0.8rem;
+}
+
+.post-header .post-meta {
+  align-items: center;
+}
+
+.toc {
+  margin-block: 0 2.5rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--border);
+  border-radius: 0.4rem;
+  background: var(--surface);
+}
+
+.toc-title {
+  margin-bottom: 0.65rem;
+  color: var(--foreground);
+  font-weight: 620;
+}
+
+.toc-list,
+.toc-sublist {
+  margin: 0;
+}
+
+.toc-sublist {
+  margin-top: 0.35rem;
+}
+
+.toc-depth-3 {
+  color: var(--muted);
+  font-size: 0.94rem;
+}
+
+.prose {
+  max-width: var(--reading-measure);
+}
+
+.prose h2,
+.prose h3 {
+  scroll-margin-top: 5rem;
+}
+
+.prose a {
+  overflow-wrap: anywhere;
+}
+
+.prose img {
+  margin-block: 1.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.4rem;
+}
+
+.post-navigation {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+}
+
+.post-navigation a {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 0.4rem;
+  color: var(--foreground);
+  text-decoration: none;
+}
+
+.post-navigation a:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.post-navigation a > span {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.post-navigation-next {
+  grid-column: 2;
+  text-align: right;
+}
+
+.legacy-message {
+  padding-block: clamp(2rem, 8vw, 5rem);
+  text-align: center;
+}
+
+.legacy-message p {
+  color: var(--muted);
+}
+
 .skip-link {
   position: fixed;
   top: 0.5rem;
@@ -508,6 +619,15 @@ td {
 
   .footer-links {
     flex-wrap: wrap;
+  }
+
+  .post-navigation {
+    grid-template-columns: 1fr;
+  }
+
+  .post-navigation-next {
+    grid-column: 1;
+    text-align: left;
   }
 }
 

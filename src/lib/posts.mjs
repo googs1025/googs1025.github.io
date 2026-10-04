@@ -69,6 +69,25 @@ export function archiveDynamicPages(posts) {
   );
 }
 
+/**
+ * Map adjacent articles from a newest-first list. "previous" is the older
+ * article and "next" is the newer article, matching chronological reading.
+ */
+export function adjacentPosts(posts, currentIndex) {
+  if (
+    !Number.isInteger(currentIndex) ||
+    currentIndex < 0 ||
+    currentIndex >= posts.length
+  ) {
+    throw new RangeError("currentIndex must identify a post");
+  }
+
+  return {
+    previous: posts[currentIndex + 1],
+    next: posts[currentIndex - 1],
+  };
+}
+
 export function postListItem(post) {
   const isExternal = Boolean(post.data.canonicalURL);
   const categories = post.data.categories.map((category) => ({

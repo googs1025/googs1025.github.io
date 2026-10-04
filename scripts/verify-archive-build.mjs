@@ -4,12 +4,16 @@ import { readFile } from "node:fs/promises";
 const readDist = (path) =>
   readFile(new URL(`../dist/${path}`, import.meta.url), "utf8");
 
-const [home, blog, cloudNative, openSource] = await Promise.all([
-  readDist("index.html"),
-  readDist("blog/index.html"),
-  readDist("categories/云原生/index.html"),
-  readDist("categories/开源社区/index.html"),
-]);
+const [home, blog, cloudNative, openSource, post, legacyPost, pagefindEntry] =
+  await Promise.all([
+    readDist("index.html"),
+    readDist("blog/index.html"),
+    readDist("categories/云原生/index.html"),
+    readDist("categories/开源社区/index.html"),
+    readDist("posts/kubecon-china-2025/index.html"),
+    readDist("posts/2025/06/14/kubecon-2025-experience/index.html"),
+    readDist("pagefind/pagefind-entry.json"),
+  ]);
 
 for (const html of [home, blog, cloudNative, openSource]) {
   assert.match(html, /<ul class="post-list">[\s\S]*<article>/);
@@ -26,5 +30,38 @@ for (const html of [home, blog, cloudNative, openSource]) {
 
 assert.match(cloudNative, /<h1 id="page-title">分类：云原生<\/h1>/);
 assert.match(openSource, /<h1 id="page-title">分类：开源社区<\/h1>/);
+
+assert.match(post, /<title>我的 KubeCon China 2025 参与之旅 \| 江振瑜<\/title>/);
+assert.match(
+  post,
+  /<meta name="description" content="分享我第一次参加 KubeCon China 2025 的现场体验、社区交流和技术观察。">/,
+);
+assert.match(
+  post,
+  /<link rel="canonical" href="https:\/\/googs1025\.github\.io\/posts\/kubecon-china-2025\/">/,
+);
+assert.match(post, /<nav class="toc" aria-label="本文目录">/);
+assert.match(post, /<article class="prose" data-pagefind-body>/);
+assert.match(post, /src="\/images\/kubecon2025\/img_13\.png"/);
+assert.match(
+  post,
+  /<time datetime="2025-06-14T00:00:00\.000Z">2025年6月14日<\/time>/,
+);
+assert.doesNotMatch(post, /更新于|aria-label="文章导航"/);
+
+assert.match(
+  legacyPost,
+  /<link rel="canonical" href="https:\/\/googs1025\.github\.io\/posts\/kubecon-china-2025\/">/,
+);
+assert.match(
+  legacyPost,
+  /<meta http-equiv="refresh" content="0; url=\/posts\/kubecon-china-2025\/">/,
+);
+assert.match(
+  legacyPost,
+  /<a href="\/posts\/kubecon-china-2025\/">继续阅读<\/a>/,
+);
+
+assert.equal(JSON.parse(pagefindEntry).languages["zh-hans"].page_count, 1);
 
 console.log("Archive build output verified.");

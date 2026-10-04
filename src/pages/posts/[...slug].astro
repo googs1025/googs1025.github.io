@@ -1,0 +1,35 @@
+---
+import {
+  getCollection,
+  render,
+  type CollectionEntry,
+} from "astro:content";
+
+import PostLayout from "@/layouts/PostLayout.astro";
+import { adjacentPosts, publishedPosts } from "@/lib/posts.mjs";
+
+interface Props {
+  post: CollectionEntry<"blog">;
+  previous?: CollectionEntry<"blog">;
+  next?: CollectionEntry<"blog">;
+}
+
+export async function getStaticPaths() {
+  const published: CollectionEntry<"blog">[] = publishedPosts(
+    await getCollection("blog"),
+  );
+  const localPosts = published.filter((post) => !post.data.canonicalURL);
+
+  return localPosts.map((post, index) => ({
+    params: { slug: post.id },
+    props: { post, ...adjacentPosts(localPosts, index) },
+  }));
+}
+
+const { post, previous, next } = Astro.props;
+const { Content, headings } = await render(post);
+---
+
+<PostLayout post={post} headings={headings} previous={previous} next={next}>
+  <Content />
+</PostLayout>
