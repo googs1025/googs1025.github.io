@@ -6,7 +6,7 @@
 
 **Architecture:** Astro statically generates the homepage, archive, categories, posts, profile pages, legacy redirect, RSS, sitemap, and 404 page. An Astro content collection validates Markdown; Pagefind indexes `dist/`; small framework-free scripts handle theme, search, and mobile navigation.
 
-**Tech Stack:** Astro 7, TypeScript 7, Astro content collections, `@astrojs/rss`, `@astrojs/sitemap`, Pagefind, Geist variable fonts, Node test runner, GitHub Pages Actions.
+**Tech Stack:** Astro 7, TypeScript 6, Astro content collections, `@astrojs/rss`, `@astrojs/sitemap`, Pagefind, Geist variable fonts, Node test runner, GitHub Pages Actions.
 
 ---
 
@@ -66,7 +66,7 @@ Expected: FAIL because `astro.config.mjs` is absent and the old package has no A
 {
   "name":"googs1025.github.io","version":"1.0.0","private":true,"type":"module",
   "scripts":{"dev":"astro dev","check":"astro check","test":"node --test tests/*.test.mjs","build":"astro build && pagefind --site dist","preview":"astro preview","verify":"npm test && npm run check && npm run build && node scripts/verify-build.mjs"},
-  "dependencies":{"@astrojs/check":"^0.9.10","@astrojs/rss":"^4.0.19","@astrojs/sitemap":"^3.7.4","@fontsource-variable/geist":"^5.3.0","@fontsource-variable/geist-mono":"^5.3.0","astro":"^7.3.5","pagefind":"^1.5.2","sharp":"^0.35.5","typescript":"^7.0.2"},
+  "dependencies":{"@astrojs/check":"^0.9.10","@astrojs/rss":"^4.0.19","@astrojs/sitemap":"^3.7.4","@fontsource-variable/geist":"^5.3.0","@fontsource-variable/geist-mono":"^5.3.0","astro":"^7.3.5","pagefind":"^1.5.2","sharp":"^0.35.5","typescript":"^6.0.3"},
   "engines":{"node":">=24.0.0"}
 }
 ```

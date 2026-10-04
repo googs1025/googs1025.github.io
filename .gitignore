@@ -14,3 +14,10 @@ package-lock.json
 
 # Ignore local feature worktrees
 .worktrees/
+
+# Ignore Astro and local development output
+node_modules/
+dist/
+.astro/
+.superpowers/
+.DS_Store
