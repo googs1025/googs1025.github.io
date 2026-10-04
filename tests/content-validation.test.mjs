@@ -32,6 +32,7 @@ test("isLegacyPath accepts same-origin pathnames including Chinese paths", () =>
     "/",
     "/posts/2025/06/14/kubecon-2025-experience/",
     "/文章/云原生/",
+    "/%E4%BA%91%E5%8E%9F%E7%94%9F/",
   ]) {
     assert.equal(isLegacyPath(value), true, value);
   }
@@ -44,11 +45,17 @@ test("isLegacyPath rejects external, malformed, and traversal paths", () => {
     "/posts/../admin",
     "/posts/./draft",
     "/posts/%2e%2e/admin",
+    "/posts/%252e%252e/admin",
+    "/posts/%252e%252e%252fadmin",
+    "/posts/%25252e%25252e/admin",
+    "/%252f%252fevil.example/posts",
     "/posts?draft=1",
     "/posts#draft",
     String.raw`/posts\draft`,
+    "/posts/%255cdraft",
     "/posts/\u0000draft",
     "/posts/\ndraft",
+    "/posts/%2525252541",
   ]) {
     assert.equal(isLegacyPath(value), false, JSON.stringify(value));
   }

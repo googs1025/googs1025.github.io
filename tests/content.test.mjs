@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { access, readFile, readdir } from "node:fs/promises";
 import test from "node:test";
 
@@ -44,32 +45,32 @@ test("every KubeCon image referenced by the migrated post exists in public", asy
   );
 });
 
-test("all 16 public KubeCon PNGs are byte-identical source copies", async () => {
-  const sourceDirectory = new URL("../images/kubecon2025/", import.meta.url);
+test("all 16 public KubeCon PNGs match tracked checksums", async () => {
+  const manifestPath = new URL(
+    "./fixtures/kubecon2025-sha256.json",
+    import.meta.url,
+  );
   const publicDirectory = new URL(
     "../public/images/kubecon2025/",
     import.meta.url,
   );
-  const pngNames = async (directory) =>
-    (await readdir(directory, { withFileTypes: true }))
-      .filter((entry) => entry.isFile() && entry.name.endsWith(".png"))
-      .map((entry) => entry.name)
-      .sort();
+  const expectedChecksums = JSON.parse(await readFile(manifestPath, "utf8"));
+  const expectedNames = Object.keys(expectedChecksums).sort();
+  const publicNames = (await readdir(publicDirectory, { withFileTypes: true }))
+    .filter((entry) => entry.isFile() && entry.name.endsWith(".png"))
+    .map((entry) => entry.name)
+    .sort();
 
-  const sourceNames = await pngNames(sourceDirectory);
-  const publicNames = await pngNames(publicDirectory);
-
+  assert.equal(expectedNames.length, 16);
   assert.equal(publicNames.length, 16);
-  assert.deepEqual(publicNames, sourceNames);
+  assert.deepEqual(publicNames, expectedNames);
 
   await Promise.all(
     publicNames.map(async (name) => {
-      const [sourceImage, publicImage] = await Promise.all([
-        readFile(new URL(name, sourceDirectory)),
-        readFile(new URL(name, publicDirectory)),
-      ]);
+      const publicImage = await readFile(new URL(name, publicDirectory));
+      const checksum = createHash("sha256").update(publicImage).digest("hex");
 
-      assert.deepEqual(publicImage, sourceImage, `${name} differs from source`);
+      assert.equal(checksum, expectedChecksums[name], `${name} checksum differs`);
     }),
   );
 });

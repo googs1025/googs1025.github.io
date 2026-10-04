@@ -1,6 +1,18 @@
 const CONTROL_CHARACTERS = /[\u0000-\u001f\u007f]/;
 const HTTP_URL = /^https?:\/\//i;
 const LEGACY_PATH_FORBIDDEN_CHARACTERS = /[?#\\\u0000-\u001f\u007f]/;
+const MAX_LEGACY_PATH_DECODINGS = 4;
+
+function isSafeLegacyPathForm(value) {
+  return (
+    value.startsWith("/") &&
+    !value.startsWith("//") &&
+    !LEGACY_PATH_FORBIDDEN_CHARACTERS.test(value) &&
+    value
+      .split("/")
+      .every((segment) => segment !== "." && segment !== "..")
+  );
+}
 
 export function isHttpUrl(value) {
   if (
@@ -21,26 +33,29 @@ export function isHttpUrl(value) {
 }
 
 export function isLegacyPath(value) {
-  if (
-    typeof value !== "string" ||
-    !value.startsWith("/") ||
-    value.startsWith("//") ||
-    LEGACY_PATH_FORBIDDEN_CHARACTERS.test(value)
-  ) {
+  if (typeof value !== "string") {
     return false;
   }
 
-  try {
-    const decodedPath = decodeURIComponent(value);
+  let decodedPath = value;
 
-    if (LEGACY_PATH_FORBIDDEN_CHARACTERS.test(decodedPath)) {
+  for (let pass = 0; pass < MAX_LEGACY_PATH_DECODINGS; pass += 1) {
+    if (!isSafeLegacyPathForm(decodedPath)) {
       return false;
     }
 
-    return decodedPath
-      .split("/")
-      .every((segment) => segment !== "." && segment !== "..");
-  } catch {
-    return false;
+    try {
+      const nextPath = decodeURIComponent(decodedPath);
+
+      if (nextPath === decodedPath) {
+        return true;
+      }
+
+      decodedPath = nextPath;
+    } catch {
+      return false;
+    }
   }
+
+  return false;
 }
