@@ -571,6 +571,122 @@ td {
   color: var(--muted);
 }
 
+.profile-intro {
+  display: grid;
+  grid-template-columns: 8.75rem minmax(0, 1fr);
+  align-items: start;
+  gap: clamp(1.25rem, 4vw, 2.5rem);
+  padding-bottom: 2rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.profile-image {
+  width: 8.75rem;
+  aspect-ratio: 7 / 10;
+  border: 1px solid var(--border);
+  border-radius: 0.45rem;
+  object-fit: cover;
+}
+
+.profile-label,
+.not-found-code {
+  margin-bottom: 0.45rem;
+  color: var(--accent);
+  font-family: "Geist Mono Variable", ui-monospace, monospace;
+  font-size: 0.78rem;
+  font-weight: 620;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.profile-intro h1,
+.cv-header h1 {
+  margin-bottom: 0.35rem;
+}
+
+.profile-handle {
+  margin-bottom: 1rem;
+  color: var(--muted);
+  font-family: "Geist Mono Variable", ui-monospace, monospace;
+}
+
+.profile-summary {
+  max-width: 34rem;
+  margin-bottom: 0;
+}
+
+.profile-section,
+.cv-section {
+  padding-block: 1.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.profile-section h2,
+.cv-section h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+}
+
+.fact-list,
+.role-list,
+.contact-list {
+  margin-bottom: 0;
+}
+
+.fact-list,
+.role-list {
+  padding-inline-start: 1.2rem;
+}
+
+.contact-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+  padding: 0;
+  list-style: none;
+}
+
+.contact-list li + li {
+  margin-top: 0;
+}
+
+.cv-header {
+  padding-bottom: 1.75rem;
+  border-bottom: 2px solid var(--accent);
+}
+
+.cv-entry + .cv-entry {
+  margin-top: 1.5rem;
+}
+
+.cv-entry h3 {
+  margin-block: 0 0.3rem;
+}
+
+.cv-entry p,
+.cv-section > p:last-child {
+  margin-bottom: 0;
+}
+
+.not-found {
+  padding-block: clamp(2rem, 8vw, 5rem);
+}
+
+.not-found h1 {
+  margin-bottom: 0.75rem;
+}
+
+.not-found > p:not(.not-found-code) {
+  max-width: 34rem;
+  color: var(--muted);
+}
+
+.not-found-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
 .skip-link {
   position: fixed;
   top: 0.5rem;
@@ -629,6 +745,15 @@ td {
     grid-column: 1;
     text-align: left;
   }
+
+  .profile-intro {
+    grid-template-columns: 6.5rem minmax(0, 1fr);
+    gap: 1rem;
+  }
+
+  .profile-image {
+    width: 6.5rem;
+  }
 }
 
 @media (max-width: 23rem) {
@@ -638,3 +763,29 @@ td {
 }
 
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}}
+
+@media print {
+  .site-header,
+  .site-footer,
+  .skip-link {
+    display: none;
+  }
+
+  .site-main {
+    min-height: auto;
+    padding-block: 0;
+  }
+
+  .cv-page {
+    width: 100%;
+  }
+
+  .cv-section {
+    break-inside: avoid;
+  }
+
+  .cv-page a {
+    color: inherit;
+    text-decoration: none;
+  }
+}

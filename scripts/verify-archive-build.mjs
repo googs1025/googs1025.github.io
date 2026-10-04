@@ -11,6 +11,10 @@ const [
   openSource,
   post,
   legacyPost,
+  about,
+  cv,
+  notFound,
+  profileImage,
   pagefindEntry,
   sitemap,
 ] =
@@ -21,6 +25,10 @@ const [
     readDist("categories/开源社区/index.html"),
     readDist("posts/kubecon-china-2025/index.html"),
     readDist("posts/2025/06/14/kubecon-2025-experience/index.html"),
+    readDist("about/index.html"),
+    readDist("cv/index.html"),
+    readDist("404.html"),
+    readFile(new URL("../dist/images/profile.jpg", import.meta.url)),
     readDist("pagefind/pagefind-entry.json"),
     readDist("sitemap-0.xml"),
   ]);
@@ -80,6 +88,40 @@ assert.match(
 );
 assert.match(legacyPost, /<meta property="og:type" content="website">/);
 
+for (const html of [about, cv]) {
+  for (const fact of [
+    "江振瑜",
+    "Kubernetes",
+    "Aibrix",
+    "Volcano",
+    "ByteDance",
+    "googs1025@gmail.com",
+    "马上消费金融",
+  ]) {
+    assert.match(html, new RegExp(fact));
+  }
+
+  for (const forbidden of [
+    "GitHub University",
+    "Version Control Theory",
+    "Skill 1",
+    "Professor Hub",
+    "academicpages",
+  ]) {
+    assert.doesNotMatch(html, new RegExp(forbidden, "i"));
+  }
+
+  assert.match(html, />Kubernetes<\/a> Member/);
+  assert.match(html, />Aibrix<\/a> Maintainer/);
+  assert.match(html, />Volcano<\/a> Member/);
+}
+
+assert.match(about, /<img[^>]+src="\/images\/profile\.jpg"[^>]+alt="江振瑜"/);
+assert.ok(profileImage.byteLength > 0, "expected the profile image in dist");
+assert.match(notFound, /<h1[^>]*>页面未找到<\/h1>/);
+assert.match(notFound, /href="\/"/);
+assert.match(notFound, /href="\/blog\/"/);
+
 assert.match(
   sitemap,
   /<loc>https:\/\/googs1025\.github\.io\/posts\/kubecon-china-2025\/<\/loc>/,
@@ -91,4 +133,4 @@ assert.doesNotMatch(
 
 assert.equal(JSON.parse(pagefindEntry).languages["zh-hans"].page_count, 1);
 
-console.log("Archive build output verified.");
+console.log("Archive and profile build output verified.");

@@ -1,0 +1,81 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+---
+
+<BaseLayout
+  title="About"
+  description="江振瑜（CYJiang）的个人简介、工作方向与开源社区参与。"
+>
+  <article class="content profile-page">
+    <header class="profile-intro">
+      <img
+        class="profile-image"
+        src="/images/profile.jpg"
+        alt="江振瑜"
+        width="420"
+        height="600"
+      />
+      <div>
+        <p class="profile-label">About</p>
+        <h1>江振瑜</h1>
+        <p class="profile-handle">CYJiang · @googs1025</p>
+        <p class="profile-summary">
+          云原生开发与基础设施工程师，关注 Kubernetes 调度、GPU
+          资源管理与 LLM 推理基础设施。
+        </p>
+      </div>
+    </header>
+
+    <section class="profile-section" aria-labelledby="about-work">
+      <h2 id="about-work">工作</h2>
+      <ul class="fact-list">
+        <li>目前在马上消费金融从事云原生基础设施相关工作。</li>
+        <li>此前曾在 ByteDance 担任云平台工程师。</li>
+      </ul>
+    </section>
+
+    <section class="profile-section" aria-labelledby="about-focus">
+      <h2 id="about-focus">技术方向</h2>
+      <ul class="fact-list">
+        <li>Kubernetes 调度</li>
+        <li>GPU 资源管理</li>
+        <li>LLM 推理基础设施</li>
+      </ul>
+    </section>
+
+    <section class="profile-section" aria-labelledby="about-open-source">
+      <h2 id="about-open-source">开源社区</h2>
+      <ul class="role-list">
+        <li>
+          <a href="https://github.com/kubernetes/kubernetes">Kubernetes</a>
+          {" "}Member
+        </li>
+        <li>
+          <a href="https://github.com/vllm-project/aibrix">Aibrix</a>
+          {" "}Maintainer
+        </li>
+        <li>
+          <a href="https://github.com/volcano-sh/volcano">Volcano</a>
+          {" "}Member
+        </li>
+        <li>
+          参与
+          <a href="https://github.com/kubernetes-sigs/scheduler-plugins"
+            >scheduler-plugins</a
+          >
+          和
+          <a href="https://github.com/kubernetes-sigs/descheduler">descheduler</a>
+          的工作、讨论与代码评审。
+        </li>
+      </ul>
+    </section>
+
+    <section class="profile-section" aria-labelledby="about-contact">
+      <h2 id="about-contact">联系</h2>
+      <ul class="contact-list">
+        <li><a href="https://github.com/googs1025">GitHub · googs1025</a></li>
+        <li><a href="mailto:googs1025@gmail.com">googs1025@gmail.com</a></li>
+      </ul>
+    </section>
+  </article>
+</BaseLayout>
