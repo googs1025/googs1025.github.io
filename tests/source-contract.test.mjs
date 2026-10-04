@@ -26,6 +26,12 @@ test("Astro targets the production site and package scripts verify it", async ()
   );
 });
 
+test("production verification entrypoint delegates to generated-output checks", async () => {
+  const verifier = await read("scripts/verify-build.mjs");
+
+  assert.match(verifier, /import\s+["']\.\/verify-archive-build\.mjs["']/);
+});
+
 test("site shell exposes accessible navigation and motion preferences", async () => {
   const [layout, header, toggle, styles] = await Promise.all([
     read("src/layouts/BaseLayout.astro"),
