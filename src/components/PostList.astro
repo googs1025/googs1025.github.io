@@ -1,8 +1,15 @@
 ---
 import type { CollectionEntry } from "astro:content";
 
+import { postListItem } from "@/lib/posts.mjs";
+
 interface Props {
   posts: CollectionEntry<"blog">[];
+}
+
+interface CategoryLink {
+  name: string;
+  url: string;
 }
 
 const { posts } = Astro.props;
@@ -11,50 +18,41 @@ const { posts } = Astro.props;
 <ul class="post-list">
   {
     posts.map((post) => {
-      const isExternal = Boolean(post.data.canonicalURL);
-      const url = post.data.canonicalURL ?? `/posts/${post.id}/`;
-      const machineDate = post.data.pubDate.toISOString();
-      const humanDate = post.data.pubDate.toLocaleDateString("zh-CN", {
-        dateStyle: "long",
-        timeZone: "UTC",
-      });
+      const item = postListItem(post);
 
       return (
         <li>
           <article>
             <h2 class="post-title">
               <a
-                href={url}
-                target={isExternal ? "_blank" : undefined}
-                rel={isExternal ? "noreferrer" : undefined}
-                aria-label={
-                  isExternal
-                    ? `${post.data.title}（外部链接，将在新标签页打开）`
-                    : undefined
-                }
+                href={item.url}
+                target={item.target}
+                rel={item.rel}
+                aria-label={item.linkAriaLabel}
               >
-                {post.data.title}
+                {item.title}
               </a>
-              {isExternal && <span class="badge external-badge">External</span>}
+              {
+                item.isExternal && (
+                  <span class="badge external-badge">{item.externalText}</span>
+                )
+              }
             </h2>
             <div class="post-meta">
-              <time datetime={machineDate}>{humanDate}</time>
+              <time datetime={item.machineDate}>{item.humanDate}</time>
               {
-                post.data.categories.length > 0 && (
+                item.hasCategories && (
                   <span class="post-categories" aria-label="文章分类">
-                    {post.data.categories.map((category) => (
-                      <a
-                        class="badge"
-                        href={`/categories/${encodeURIComponent(category)}/`}
-                      >
-                        {category}
+                    {item.categories.map((category: CategoryLink) => (
+                      <a class="badge" href={category.url}>
+                        {category.name}
                       </a>
                     ))}
                   </span>
                 )
               }
             </div>
-            <p class="post-description">{post.data.description}</p>
+            <p class="post-description">{item.description}</p>
           </article>
         </li>
       );

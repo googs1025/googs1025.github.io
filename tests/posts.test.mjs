@@ -1,7 +1,21 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { paginatePosts, publishedPosts } from "../src/lib/posts.mjs";
+import * as postsModule from "../src/lib/posts.mjs";
+
+const { paginatePosts, publishedPosts } = postsModule;
+
+const syntheticPosts = (count) =>
+  Array.from({ length: count }, (_, index) => ({
+    id: `post-${index + 1}`,
+    data: {
+      draft: false,
+      pubDate: new Date("2025-01-01"),
+    },
+  }));
+
+const postIds = (start, end) =>
+  Array.from({ length: end - start + 1 }, (_, index) => `post-${start + index}`);
 
 test("publishedPosts filters drafts and sorts newest posts first without mutating input", () => {
   const posts = [
@@ -18,6 +32,24 @@ test("publishedPosts filters drafts and sorts newest posts first without mutatin
   assert.deepEqual(
     posts.map(({ id }) => id),
     originalOrder,
+  );
+});
+
+test("publishedPosts breaks equal publication dates by id regardless of input order", () => {
+  const pubDate = new Date("2025-01-01");
+  const ascending = [
+    { id: "alpha", data: { draft: false, pubDate } },
+    { id: "beta", data: { draft: false, pubDate } },
+  ];
+  const reversed = [...ascending].reverse();
+
+  assert.deepEqual(
+    publishedPosts(ascending).map(({ id }) => id),
+    ["alpha", "beta"],
+  );
+  assert.deepEqual(
+    publishedPosts(reversed).map(({ id }) => id),
+    ["alpha", "beta"],
   );
 });
 
@@ -64,4 +96,71 @@ test("paginatePosts rejects pages beyond the available range", () => {
       message: "currentPage must not exceed totalPages",
     });
   }
+});
+
+test("archive page policy uses ten items and hides pagination through ten posts", () => {
+  assert.equal(postsModule.PAGE_SIZE, 10);
+
+  const summaries = [0, 1, 10, 11, 21].map((count) => {
+    const page = postsModule.archivePage?.(syntheticPosts(count), 1);
+
+    return {
+      count,
+      itemIds: page?.items.map(({ id }) => id),
+      totalPages: page?.totalPages,
+      showPagination: page?.showPagination,
+    };
+  });
+
+  assert.deepEqual(summaries, [
+    { count: 0, itemIds: [], totalPages: 1, showPagination: false },
+    { count: 1, itemIds: ["post-1"], totalPages: 1, showPagination: false },
+    { count: 10, itemIds: postIds(1, 10), totalPages: 1, showPagination: false },
+    { count: 11, itemIds: postIds(1, 10), totalPages: 2, showPagination: true },
+    { count: 21, itemIds: postIds(1, 10), totalPages: 3, showPagination: true },
+  ]);
+});
+
+test("archive dynamic pages omit page one and preserve every remaining item", () => {
+  const pageSets = [0, 1, 10, 11, 21].map((count) => ({
+    count,
+    pages:
+      postsModule.archiveDynamicPages?.(syntheticPosts(count)).map((page) => ({
+        currentPage: page.currentPage,
+        itemIds: page.items.map(({ id }) => id),
+      })) ?? null,
+  }));
+
+  assert.deepEqual(pageSets, [
+    { count: 0, pages: [] },
+    { count: 1, pages: [] },
+    { count: 10, pages: [] },
+    { count: 11, pages: [{ currentPage: 2, itemIds: ["post-11"] }] },
+    {
+      count: 21,
+      pages: [
+        { currentPage: 2, itemIds: postIds(11, 20) },
+        { currentPage: 3, itemIds: ["post-21"] },
+      ],
+    },
+  ]);
+});
+
+test("archive navigation points page two homeward and later pages numerically", () => {
+  const posts = syntheticPosts(21);
+  const pages = [1, 2, 3].map((currentPage) => {
+    const page = postsModule.archivePage?.(posts, currentPage);
+
+    return {
+      currentPage,
+      previousHref: page?.previousHref,
+      nextHref: page?.nextHref,
+    };
+  });
+
+  assert.deepEqual(pages, [
+    { currentPage: 1, previousHref: undefined, nextHref: "/blog/2/" },
+    { currentPage: 2, previousHref: "/blog/", nextHref: "/blog/3/" },
+    { currentPage: 3, previousHref: "/blog/2/", nextHref: undefined },
+  ]);
 });

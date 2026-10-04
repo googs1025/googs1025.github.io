@@ -13,6 +13,10 @@ test("Astro targets the production site and package scripts verify it", async ()
   assert.match(config, /sitemap\(\)/);
   assert.equal(pkg.scripts.test, "node --test tests/*.test.mjs");
   assert.equal(
+    pkg.scripts.build,
+    "astro build && pagefind --site dist && node scripts/verify-archive-build.mjs",
+  );
+  assert.equal(
     pkg.scripts.verify,
     "npm test && npm run check && npm run build && node scripts/verify-build.mjs",
   );
@@ -55,20 +59,22 @@ test("post lists render semantic articles with dates and rooted category links",
   assert.match(postList, /CollectionEntry<["']blog["']>\[\]/);
   assert.match(postList, /<ul\s+class=["']post-list["']/);
   assert.match(postList, /<li>[\s\S]*<article>[\s\S]*<time\s+datetime=/);
-  assert.match(postList, /toLocaleDateString\(["']zh-CN["']/);
-  assert.match(postList, /`\/categories\/\$\{encodeURIComponent\(category\)\}\//);
+  assert.match(postList, /postListItem\(post\)/);
+  assert.match(postList, /datetime=\{item\.machineDate\}/);
+  assert.match(postList, /item\.hasCategories/);
+  assert.match(postList, /href=\{category\.url\}/);
   assert.doesNotMatch(postList, /set:html|innerHTML/);
 });
 
 test("post lists distinguish external canonical links accessibly", async () => {
   const postList = await read("src/components/PostList.astro");
 
-  assert.match(postList, /canonicalURL\s*\?\?/);
-  assert.match(postList, /`\/posts\/\$\{post\.id\}\//);
-  assert.match(postList, /target=\{[^}]*\?\s*["']_blank["']/);
-  assert.match(postList, /rel=\{[^}]*\?\s*["']noreferrer["']/);
-  assert.match(postList, />External</);
-  assert.match(postList, /aria-label=/);
+  assert.match(postList, /href=\{item\.url\}/);
+  assert.match(postList, /target=\{item\.target\}/);
+  assert.match(postList, /rel=\{item\.rel\}/);
+  assert.match(postList, /aria-label=\{item\.linkAriaLabel\}/);
+  assert.match(postList, /item\.isExternal/);
+  assert.match(postList, /item\.externalText/);
 });
 
 test("home loads published posts and intentionally handles an empty collection", async () => {
@@ -88,11 +94,12 @@ test("blog index uses shared pagination and links to page two only when needed",
 
   assert.match(archive, /getCollection\(["']blog["']\)/);
   assert.match(archive, /publishedPosts\(/);
-  assert.match(archive, /paginatePosts\([^,]+,\s*1,\s*10\)/);
+  assert.match(archive, /archivePage\(published,\s*1\)/);
   assert.match(archive, /<h1[^>]*>全部文章<\/h1>/);
-  assert.match(archive, /totalPages\s*>\s*1/);
+  assert.match(archive, /showPagination/);
   assert.match(archive, /<nav\s+aria-label=["']文章分页["']/);
-  assert.match(archive, /href=["']\/blog\/2\/["']/);
+  assert.match(archive, /href=\{nextHref\}/);
+  assert.doesNotMatch(archive, /paginatePosts|PAGE_SIZE|\/blog\/2\//);
 });
 
 test("dynamic blog pages start at page two and expose previous and next links", async () => {
@@ -101,10 +108,11 @@ test("dynamic blog pages start at page two and expose previous and next links", 
   assert.match(archivePage, /getStaticPaths/);
   assert.match(archivePage, /getCollection\(["']blog["']\)/);
   assert.match(archivePage, /publishedPosts\(/);
-  assert.match(archivePage, /paginatePosts\(/);
-  assert.match(archivePage, /(?:from|start)\s*(?::|=)\s*2/);
-  assert.match(archivePage, /currentPage\s*===\s*2\s*\?\s*["']\/blog\/["']/);
+  assert.match(archivePage, /archiveDynamicPages\(published\)/);
+  assert.match(archivePage, /previousHref/);
+  assert.match(archivePage, /nextHref/);
   assert.match(archivePage, /aria-label=["']文章分页["']/);
+  assert.doesNotMatch(archivePage, /paginatePosts|Math\.ceil|PAGE_SIZE|currentPage\s*===\s*2/);
 });
 
 test("category pages derive exact published categories and share the post list", async () => {

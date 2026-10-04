@@ -3,10 +3,14 @@ import { getCollection } from "astro:content";
 
 import PostList from "@/components/PostList.astro";
 import BaseLayout from "@/layouts/BaseLayout.astro";
-import { paginatePosts, publishedPosts } from "@/lib/posts.mjs";
+import { archivePage, publishedPosts } from "@/lib/posts.mjs";
 
 const published = publishedPosts(await getCollection("blog"));
-const { items: posts, totalPages } = paginatePosts(published, 1, 10);
+const {
+  items: posts,
+  showPagination,
+  nextHref,
+} = archivePage(published, 1);
 ---
 
 <BaseLayout title="全部文章">
@@ -18,10 +22,10 @@ const { items: posts, totalPages } = paginatePosts(published, 1, 10);
         : <p class="empty-state">这里还没有已发布的文章。</p>
     }
     {
-      totalPages > 1 && (
+      showPagination && (
         <nav aria-label="文章分页" class="pagination">
           <span aria-current="page">第 1 页</span>
-          <a href="/blog/2/" rel="next">下一页</a>
+          <a href={nextHref} rel="next">下一页</a>
         </nav>
       )
     }
