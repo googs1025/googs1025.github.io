@@ -28,7 +28,11 @@ test("site shell exposes accessible navigation and motion preferences", async ()
 
   assert.match(layout, /href=["']#main-content["']/);
   assert.match(header, /aria-label=["']主导航["']/);
+  assert.match(header, /aria-label=["']导航菜单["']/);
+  assert.match(header, /title=["']导航菜单["']/);
+  assert.doesNotMatch(header, /打开导航/);
   assert.match(toggle, /aria-label=["']切换颜色主题["']/);
+  assert.match(styles, /scroll-padding-top:\s*4\.5rem/);
   assert.match(styles, /prefers-reduced-motion\s*:\s*reduce/);
 });
 
@@ -40,7 +44,7 @@ test("site header stays visible with a translucent token-based surface", async (
   assert.match(siteHeader, /top:\s*0/);
   assert.match(
     siteHeader,
-    /background:\s*color-mix\([^;]*var\(--background\)[^;]*transparent[^;]*\)/,
+    /background:\s*var\(--background\);\s*background:\s*color-mix\([^;]*var\(--background\)[^;]*transparent[^;]*\)/,
   );
   assert.match(siteHeader, /(?:-webkit-)?backdrop-filter:\s*blur\(/);
 });

@@ -10,6 +10,7 @@
 html {
   min-width: 0;
   background: var(--background);
+  scroll-padding-top: 4.5rem;
   scroll-behavior: smooth;
 }
 
@@ -191,6 +192,7 @@ td {
   top: 0;
   z-index: 10;
   border-bottom: 1px solid var(--border);
+  background: var(--background);
   background: color-mix(in srgb, var(--background) 88%, transparent);
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
