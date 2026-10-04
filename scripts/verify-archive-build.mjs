@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { access, readFile } from "node:fs/promises";
 
 import { PROFILE } from "../src/data/profile.mjs";
 
@@ -28,6 +28,7 @@ const [
   profileImage,
   pagefindEntry,
   sitemap,
+  rss,
 ] =
   await Promise.all([
     readDist("index.html"),
@@ -42,7 +43,26 @@ const [
     readFile(new URL("../dist/images/profile.jpg", import.meta.url)),
     readDist("pagefind/pagefind-entry.json"),
     readDist("sitemap-0.xml"),
+    readDist("rss.xml"),
   ]);
+
+await access(new URL("../dist/pagefind/pagefind.js", import.meta.url));
+
+assert.match(home, /<dialog\b[^>]*aria-label="全文搜索"/);
+assert.match(home, /<input\b[^>]*type="search"/);
+assert.match(home, /aria-live="polite"/);
+assert.doesNotMatch(home, /\.innerHTML\s*=|javascript:/);
+assert.doesNotMatch(home, /__VITE_PRELOAD__/);
+const searchScriptHref = home.match(
+  /<script\s+type="module"\s+src="([^"]*SearchDialog[^"]*)"/,
+)?.[1];
+assert.ok(searchScriptHref, "expected a generated search client script");
+const searchScript = await readDist(searchScriptHref.replace(/^\//, ""));
+assert.match(searchScript, /pagefind\/pagefind\.js/);
+assert.doesNotMatch(
+  searchScript,
+  /__VITE_PRELOAD__|\.innerHTML\s*=|javascript:/,
+);
 
 for (const html of [home, blog, cloudNative, openSource]) {
   assert.match(html, /<ul class="post-list">[\s\S]*<article>/);
@@ -169,5 +189,21 @@ assert.doesNotMatch(
 );
 
 assert.equal(JSON.parse(pagefindEntry).languages["zh-hans"].page_count, 1);
+
+assert.match(rss, /<title>江振瑜<\/title>/);
+assert.match(
+  rss,
+  new RegExp(
+    `<description>${escapeRegExp("江振瑜的技术博客，记录 Kubernetes 调度、云原生基础设施与 LLM 推理平台实践。")}</description>`,
+  ),
+);
+assert.match(
+  rss,
+  /<item>[\s\S]*<title>我的 KubeCon China 2025 参与之旅<\/title>/,
+);
+assert.match(
+  rss,
+  /<link>https:\/\/googs1025\.github\.io\/posts\/kubecon-china-2025\/<\/link>/,
+);
 
 console.log("Archive and profile build output verified.");

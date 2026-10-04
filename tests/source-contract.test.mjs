@@ -44,6 +44,32 @@ test("site shell exposes accessible navigation and motion preferences", async ()
   assert.match(styles, /prefers-reduced-motion\s*:\s*reduce/);
 });
 
+test("search dialog exposes a safe accessible Pagefind interface", async () => {
+  const [searchDialog, header] = await Promise.all([
+    read("src/components/SearchDialog.astro"),
+    read("src/components/Header.astro"),
+  ]);
+
+  assert.match(searchDialog, /<dialog\b/);
+  assert.match(searchDialog, /aria-label=["']全文搜索["']/);
+  assert.match(searchDialog, /\/pagefind\/pagefind\.js/);
+  assert.match(searchDialog, /import\([^)]*pagefindPath\)/);
+  assert.match(searchDialog, /aria-live=["']polite["']/);
+  assert.match(searchDialog, /没有找到相关文章/);
+  assert.doesNotMatch(searchDialog, /innerHTML/);
+  assert.match(header, /import\s+SearchDialog\s+from/);
+  assert.match(header, /<SearchDialog\s*\/>/);
+  assert.doesNotMatch(header, /<a[^>]+aria-label=["']搜索文章["']/);
+});
+
+test("RSS is generated from published posts and shared site metadata", async () => {
+  const feed = await read("src/pages/rss.xml.ts");
+
+  assert.match(feed, /from\s+["']@astrojs\/rss["']/);
+  assert.match(feed, /publishedPosts/);
+  assert.match(feed, /SITE/);
+});
+
 test("site header stays visible with a translucent token-based surface", async () => {
   const styles = await read("src/styles/global.css");
   const siteHeader = styles.match(/\.site-header\s*\{([^}]*)\}/s)?.[1] ?? "";

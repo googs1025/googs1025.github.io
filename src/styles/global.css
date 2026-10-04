@@ -238,6 +238,7 @@ td {
 
 .desktop-navigation,
 .mobile-navigation,
+.header-actions,
 .nav-list,
 .footer-links {
   display: flex;
@@ -245,6 +246,10 @@ td {
 }
 
 .desktop-navigation {
+  gap: 0.45rem;
+}
+
+.header-actions {
   gap: 0.45rem;
 }
 
@@ -315,6 +320,107 @@ td {
 .mobile-navigation {
   display: none;
   gap: 0.35rem;
+}
+
+.search-controller {
+  display: flex;
+}
+
+.search-dialog {
+  width: min(calc(100% - 2rem), 42rem);
+  max-height: min(80vh, 44rem);
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--background);
+  color: var(--foreground);
+}
+
+.search-dialog::backdrop {
+  background: rgb(9 18 20 / 58%);
+}
+
+.search-dialog-inner {
+  max-height: min(80vh, 44rem);
+  overflow-y: auto;
+  padding: clamp(1rem, 4vw, 1.5rem);
+}
+
+.search-dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.search-dialog-header h2,
+.search-dialog-header form {
+  margin: 0;
+}
+
+.search-dialog-header h2 {
+  font-size: 1.35rem;
+}
+
+.search-field {
+  display: grid;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+  font-weight: 620;
+}
+
+.search-field input {
+  width: 100%;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 0.35rem;
+  background: var(--surface);
+  color: var(--foreground);
+}
+
+.search-field input:focus {
+  border-color: var(--accent);
+}
+
+.search-status {
+  min-height: 1.65em;
+  margin-block: 0.8rem;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.search-results {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.search-results > li {
+  padding-block: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.search-results h3 {
+  margin: 0 0 0.35rem;
+  font-size: 1.05rem;
+}
+
+.search-results a {
+  color: var(--foreground);
+  text-decoration-color: var(--border);
+}
+
+.search-results a:hover {
+  color: var(--accent);
+  text-decoration-color: currentColor;
+}
+
+.search-results p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.92rem;
 }
 
 .nav-details {
@@ -721,6 +827,19 @@ td {
 
   .mobile-navigation {
     display: flex;
+  }
+
+  .header-actions {
+    gap: 0.3rem;
+  }
+
+  .search-dialog {
+    width: calc(100% - 1rem);
+    max-height: calc(100vh - 1rem);
+  }
+
+  .search-dialog-inner {
+    max-height: calc(100vh - 1rem);
   }
 
   .brand-handle {
