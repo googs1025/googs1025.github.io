@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { access, readFile } from "node:fs/promises";
+import { access, readFile, readdir } from "node:fs/promises";
 import test from "node:test";
 
 const postPath = new URL(
@@ -23,15 +23,53 @@ test("the migrated KubeCon post has normalized metadata and no authoring prompts
 
 test("every KubeCon image referenced by the migrated post exists in public", async () => {
   const post = await readFile(postPath, "utf8");
-  const imagePaths = [
-    ...post.matchAll(/!\[[^\]]*\]\((\/images\/kubecon2025\/[^)\s]+)\)/g),
-  ].map((match) => match[1]);
+  const imageReferences = [
+    ...post.matchAll(/!\[([^\]]*)\]\(([^)\s]+)\)/g),
+  ].map((match) => ({ alt: match[1], path: match[2] }));
 
-  assert.ok(imagePaths.length > 0, "expected at least one KubeCon image reference");
+  assert.ok(
+    imageReferences.length > 0,
+    "expected at least one KubeCon image reference",
+  );
+
+  for (const image of imageReferences) {
+    assert.ok(image.alt.trim(), `expected nonempty alt text for ${image.path}`);
+    assert.match(image.path, /^\/images\/kubecon2025\//);
+  }
 
   await Promise.all(
-    imagePaths.map((imagePath) =>
-      access(new URL(`../public${imagePath}`, import.meta.url)),
+    imageReferences.map(({ path }) =>
+      access(new URL(`../public${path}`, import.meta.url)),
     ),
+  );
+});
+
+test("all 16 public KubeCon PNGs are byte-identical source copies", async () => {
+  const sourceDirectory = new URL("../images/kubecon2025/", import.meta.url);
+  const publicDirectory = new URL(
+    "../public/images/kubecon2025/",
+    import.meta.url,
+  );
+  const pngNames = async (directory) =>
+    (await readdir(directory, { withFileTypes: true }))
+      .filter((entry) => entry.isFile() && entry.name.endsWith(".png"))
+      .map((entry) => entry.name)
+      .sort();
+
+  const sourceNames = await pngNames(sourceDirectory);
+  const publicNames = await pngNames(publicDirectory);
+
+  assert.equal(publicNames.length, 16);
+  assert.deepEqual(publicNames, sourceNames);
+
+  await Promise.all(
+    publicNames.map(async (name) => {
+      const [sourceImage, publicImage] = await Promise.all([
+        readFile(new URL(name, sourceDirectory)),
+        readFile(new URL(name, publicDirectory)),
+      ]);
+
+      assert.deepEqual(publicImage, sourceImage, `${name} differs from source`);
+    }),
   );
 });

@@ -1,5 +1,8 @@
-import { defineCollection, z } from "astro:content";
+import { defineCollection } from "astro:content";
 import { glob } from "astro/loaders";
+import { z } from "astro/zod";
+
+import { isHttpUrl, isLegacyPath } from "./lib/content-validation.mjs";
 
 const blog = defineCollection({
   loader: glob({
@@ -13,8 +16,17 @@ const blog = defineCollection({
     updatedDate: z.coerce.date().optional(),
     categories: z.array(z.string()).default([]),
     draft: z.boolean().default(false),
-    canonicalURL: z.string().url().optional(),
-    legacyURLs: z.array(z.string().startsWith("/")).default([]),
+    canonicalURL: z
+      .string()
+      .refine(isHttpUrl, { error: "canonicalURL must be an HTTP(S) URL" })
+      .optional(),
+    legacyURLs: z
+      .array(
+        z.string().refine(isLegacyPath, {
+          error: "legacyURLs entries must be same-origin pathnames",
+        }),
+      )
+      .default([]),
   }),
 });
 

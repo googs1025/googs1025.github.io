@@ -38,3 +38,30 @@ test("paginatePosts keeps an empty collection on page one", () => {
     totalPages: 1,
   });
 });
+
+test("paginatePosts requires currentPage to be a positive integer", () => {
+  for (const currentPage of [0, -1, 1.5, Number.NaN]) {
+    assert.throws(() => paginatePosts([1], currentPage, 10), {
+      name: "RangeError",
+      message: "currentPage must be a positive integer",
+    });
+  }
+});
+
+test("paginatePosts requires pageSize to be a positive integer", () => {
+  for (const pageSize of [0, -1, 1.5, Number.NaN]) {
+    assert.throws(() => paginatePosts([1], 1, pageSize), {
+      name: "RangeError",
+      message: "pageSize must be a positive integer",
+    });
+  }
+});
+
+test("paginatePosts rejects pages beyond the available range", () => {
+  for (const posts of [[], [1]]) {
+    assert.throws(() => paginatePosts(posts, 2, 10), {
+      name: "RangeError",
+      message: "currentPage must not exceed totalPages",
+    });
+  }
+});
