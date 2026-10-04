@@ -10,6 +10,6 @@ export function paginatePosts(posts, currentPage, pageSize) {
   return {
     items: posts.slice(start, start + pageSize),
     currentPage,
-    totalPages: Math.ceil(posts.length / pageSize),
+    totalPages: Math.max(1, Math.ceil(posts.length / pageSize)),
   };
 }

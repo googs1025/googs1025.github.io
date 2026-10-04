@@ -30,3 +30,11 @@ test("paginatePosts returns the second page and pagination metadata", () => {
     totalPages: 2,
   });
 });
+
+test("paginatePosts keeps an empty collection on page one", () => {
+  assert.deepEqual(paginatePosts([], 1, 10), {
+    items: [],
+    currentPage: 1,
+    totalPages: 1,
+  });
+});
