@@ -1,33 +1,33 @@
-# Product
+# 产品说明
 
-## Register
+## 用户与目的
 
-brand
+这是江振瑜的中文优先技术博客，面向云原生工程师、开源协作者、社区伙伴，以及希望了解作者技术方向与实践经历的读者。站点以可信、清晰、克制的方式分享 Kubernetes、云原生基础设施、开源社区和 LLM 推理平台相关内容，并提供必要的个人背景与联系入口。
 
-## Users
+## 产品个性
 
-Visitors are open source collaborators, hiring managers, conference/community peers, and engineers interested in cloud native infrastructure, Kubernetes scheduling, and LLM inference platforms. They arrive looking for a quick read on CYJiang's technical focus, open source credibility, and contact paths.
+专业但不疏离，技术导向但不堆砌术语，重视社区与真实经验。表达应直接、可靠、有个人判断，避免营销口吻和未经证实的成果包装。
 
-## Product Purpose
+## 信息架构
 
-This site is a personal homepage and professional portfolio. It should make CYJiang's engineering identity clear within the first screen, organize open source/community work into scannable sections, and provide simple links for follow-up.
+- 首页（Home）采用博客优先结构，首先呈现最新文章，而不是作品展示墙。
+- Blog 提供完整文章归档、分类浏览和分页。
+- About 说明作者身份、技术关注和开源参与。
+- CV 提供适合屏幕阅读与打印的结构化履历。
 
-## Brand Personality
+内容以中文优先；必要的英文术语保留行业通用写法，不为形式上的双语而重复内容。
 
-Practical, technical, community-minded. The tone should feel direct and credible rather than promotional.
+## 技术与功能
 
-## Anti-references
+站点由 Astro 生成纯静态页面，文章使用 Markdown 内容集合管理。Pagefind 提供静态全文搜索，同时支持深色模式、RSS、站点地图和旧链接兼容页。构建产物通过 GitHub Pages 发布，不依赖运行时服务或数据库。
 
-Avoid generic marketing landing pages, oversized hero sections, decorative gradients, and content-light card grids. Do not fully copy the reference site's personal content or academic assumptions; use its readable section rhythm and project-card structure as inspiration.
+## 视觉原则
 
-## Design Principles
+视觉方向为 **Calm Teal**：以低饱和青绿色作为强调色，配合中性色背景、清晰排版和充足留白。界面应把阅读放在首位，减少装饰和视觉噪声，在明暗主题中保持一致的层级、对比度与品牌识别。
 
-- Lead with technical identity and open source credibility.
-- Prefer clear sections over dense unstructured lists.
-- Make project and community contributions easy to scan.
-- Keep GitHub Pages/Jekyll changes small and maintainable.
-- Preserve bilingual accessibility without duplicating clutter.
+## 可访问性与内容原则
 
-## Accessibility & Inclusion
-
-Target readable contrast, semantic headings, responsive layout, useful alt text for project imagery, and no motion-dependent content.
+- 使用语义化标题、导航和文章结构，支持键盘操作与清晰的焦点状态。
+- 保持可读对比度、响应式布局和减少动态效果的系统偏好支持。
+- 图片提供准确替代文本；交互控件提供明确名称和状态反馈。
+- 所有公开事实、经历、角色与成果必须来自作者确认的真实资料，不编造、不推测、不用占位内容冒充事实。
