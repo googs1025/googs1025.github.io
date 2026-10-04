@@ -1,5 +1,7 @@
 import { createLatestRequest } from "./search.mjs";
 
+export const MAX_RESULTS = 10;
+
 export function createPagefindLoader(importPagefind) {
   let pagefindPromise;
 
@@ -48,8 +50,11 @@ export function setupSearchDialog({
       if (!requests.isCurrent(request) || !dialog.open) return;
 
       const response = await pagefind.search(query);
+      if (!requests.isCurrent(request) || !dialog.open) return;
+
+      const totalMatches = response.results.length;
       const matches = await Promise.all(
-        response.results.map((result) => result.data()),
+        response.results.slice(0, MAX_RESULTS).map((result) => result.data()),
       );
       if (
         !requests.isCurrent(request) ||
@@ -66,7 +71,9 @@ export function setupSearchDialog({
       }
 
       results.replaceChildren(...matches.map(renderResult));
-      status.textContent = `找到 ${matches.length} 篇相关文章`;
+      status.textContent = totalMatches > matches.length
+        ? `找到 ${totalMatches} 篇相关文章，显示前 ${matches.length} 篇`
+        : `找到 ${totalMatches} 篇相关文章`;
     } catch {
       if (requests.isCurrent(request) && dialog.open) {
         showSearchError();
@@ -74,7 +81,8 @@ export function setupSearchDialog({
     }
   };
 
-  trigger.addEventListener("click", () => {
+  trigger.addEventListener("click", (event) => {
+    event.preventDefault();
     if (!dialog.open) dialog.showModal();
     input.focus();
 
@@ -108,6 +116,13 @@ export function setupSearchDialog({
     debounceTimer = setTimer(() => {
       void runSearch(query);
     }, 150);
+  });
+
+  dialog.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      dialog.close();
+    }
   });
 
   dialog.addEventListener("close", () => {

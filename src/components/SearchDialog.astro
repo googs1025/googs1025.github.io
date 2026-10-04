@@ -1,7 +1,7 @@
 <div class="search-controller" data-search-root>
-  <button
+  <a
     class="icon-button"
-    type="button"
+    href="/blog/"
     aria-label="搜索文章"
     title="搜索文章"
     aria-haspopup="dialog"
@@ -11,7 +11,7 @@
       <circle cx="11" cy="11" r="6.5"></circle>
       <path d="m16 16 4 4"></path>
     </svg>
-  </button>
+  </a>
 
   <dialog class="search-dialog" aria-label="全文搜索" data-search-dialog>
     <div class="search-dialog-inner">
@@ -99,7 +99,7 @@
     const results = root.querySelector("[data-search-results]");
 
     if (
-      !(trigger instanceof HTMLButtonElement) ||
+      !(trigger instanceof HTMLAnchorElement) ||
       !(dialog instanceof HTMLDialogElement) ||
       !(input instanceof HTMLInputElement) ||
       !(status instanceof HTMLElement) ||

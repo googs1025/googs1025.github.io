@@ -18,12 +18,14 @@ test("Astro targets the production site and package scripts verify it", async ()
   assert.equal(pkg.scripts.test, "node --test tests/*.test.mjs");
   assert.equal(
     pkg.scripts.build,
-    "astro build && pagefind --site dist && node scripts/verify-archive-build.mjs",
+    "astro build && pagefind --site dist",
   );
+  assert.equal(pkg.scripts["test:e2e"], "playwright test");
   assert.equal(
     pkg.scripts.verify,
-    "npm test && npm run check && npm run build && node scripts/verify-build.mjs",
+    "npm test && npm run check && npm run build && node scripts/verify-build.mjs && npm run test:e2e",
   );
+  assert.equal(pkg.devDependencies["@playwright/test"], "^1.63.0");
 });
 
 test("production verification entrypoint delegates to generated-output checks", async () => {
@@ -57,6 +59,10 @@ test("search dialog exposes a safe accessible Pagefind interface", async () => {
   ]);
 
   assert.match(searchDialog, /<dialog\b/);
+  assert.match(
+    searchDialog,
+    /<a\b[^>]*href=["']\/blog\/["'][^>]*data-search-open/,
+  );
   assert.match(searchDialog, /aria-label=["']全文搜索["']/);
   assert.match(searchDialog, /\/pagefind\/pagefind\.js/);
   assert.match(searchDialog, /import\([^)]*pagefindPath\)/);
@@ -66,6 +72,33 @@ test("search dialog exposes a safe accessible Pagefind interface", async () => {
   assert.match(header, /import\s+SearchDialog\s+from/);
   assert.match(header, /<SearchDialog\s*\/>/);
   assert.doesNotMatch(header, /<a[^>]+aria-label=["']搜索文章["']/);
+});
+
+test("generated verifier scales with additional posts", async () => {
+  const verifier = await read("scripts/verify-archive-build.mjs");
+
+  assert.doesNotMatch(verifier, /page_count\s*,\s*1/);
+  assert.match(verifier, /indexedPages\s*>=\s*1/);
+  assert.doesNotMatch(
+    verifier,
+    /for\s*\(const html of \[home, blog, cloudNative, openSource\]\)[\s\S]{0,500}kubecon-china-2025/,
+  );
+});
+
+test("Playwright runs production search and no-JS smoke tests", async () => {
+  const [config, smoke, gitignore] = await Promise.all([
+    read("playwright.config.mjs"),
+    read("tests/search-dialog.e2e.spec.mjs"),
+    read(".gitignore"),
+  ]);
+
+  assert.match(config, /npm run preview -- --host 127\.0\.0\.1/);
+  assert.match(config, /baseURL:\s*["']http:\/\/127\.0\.0\.1:4321["']/);
+  assert.match(smoke, /javaScriptEnabled:\s*false/);
+  assert.match(smoke, /KubeCon/);
+  assert.match(smoke, /press\(["']Escape["']\)/);
+  assert.match(gitignore, /^test-results\/$/m);
+  assert.match(gitignore, /^playwright-report\/$/m);
 });
 
 test("RSS is generated from published posts and shared site metadata", async () => {

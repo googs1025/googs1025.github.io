@@ -66,15 +66,6 @@ assert.doesNotMatch(
 
 for (const html of [home, blog, cloudNative, openSource]) {
   assert.match(html, /<ul class="post-list">[\s\S]*<article>/);
-  assert.match(html, /href="\/posts\/kubecon-china-2025\/"/);
-  assert.match(
-    html,
-    /<time datetime="2025-06-14T00:00:00\.000Z">2025年6月14日<\/time>/,
-  );
-  assert.match(
-    html,
-    /href="\/categories\/%E4%BA%91%E5%8E%9F%E7%94%9F\/"/,
-  );
   assert.match(html, /<meta property="og:type" content="website">/);
 }
 
@@ -188,7 +179,9 @@ assert.doesNotMatch(
   /<loc>https:\/\/googs1025\.github\.io\/posts\/2025\/06\/14\/kubecon-2025-experience\/<\/loc>/,
 );
 
-assert.equal(JSON.parse(pagefindEntry).languages["zh-hans"].page_count, 1);
+const indexedPages = Object.values(JSON.parse(pagefindEntry).languages)
+  .reduce((total, language) => total + language.page_count, 0);
+assert.ok(indexedPages >= 1, "expected Pagefind to index at least one page");
 
 assert.match(rss, /<title>江振瑜<\/title>/);
 assert.match(
