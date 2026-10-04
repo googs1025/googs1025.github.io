@@ -425,7 +425,7 @@ Delete `.github/workflows/scrape_talks.yml`. Create:
 name: Deploy Astro site to Pages
 on:
   push:
-    branches: [main]
+    branches: [master]
   workflow_dispatch:
 permissions:
   contents: read
@@ -444,6 +444,7 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
+      - run: npx playwright install --with-deps chromium
       - run: npm run verify
       - uses: actions/configure-pages@v6
       - uses: actions/upload-pages-artifact@v5

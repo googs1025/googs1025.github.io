@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { access, readFile } from "node:fs/promises";
 import test from "node:test";
 
 export const read = (path) =>
@@ -28,10 +28,49 @@ test("Astro targets the production site and package scripts verify it", async ()
   assert.equal(pkg.devDependencies["@playwright/test"], "^1.63.0");
 });
 
-test("production verification entrypoint delegates to generated-output checks", async () => {
+test("production verification entrypoint owns the complete generated-output checks", async () => {
   const verifier = await read("scripts/verify-build.mjs");
 
-  assert.match(verifier, /import\s+["']\.\/verify-archive-build\.mjs["']/);
+  assert.match(verifier, /readDist\(["']index\.html["']\)/);
+  assert.match(verifier, /dist\/pagefind\/pagefind\.js|pagefind\/pagefind\.js/);
+  assert.match(verifier, /PROFILE/);
+  assert.match(verifier, /lang=["']zh-Hans["']/);
+  assert.match(verifier, /rss\.xml/);
+  assert.match(verifier, /data-theme-toggle/);
+  assert.doesNotMatch(verifier, /verify-archive-build/);
+  await assert.rejects(access(new URL("../scripts/verify-archive-build.mjs", import.meta.url)));
+});
+
+test("Pages deployment verifies master with current approved action majors", async () => {
+  const workflow = await read(".github/workflows/deploy.yml");
+
+  assert.match(workflow, /^on:\s*\n\s+push:\s*\n\s+branches:\s*\[master\]\s*$/m);
+  assert.match(workflow, /^\s+workflow_dispatch:\s*$/m);
+  assert.match(workflow, /uses:\s*actions\/checkout@v7/);
+  assert.match(workflow, /uses:\s*actions\/setup-node@v7/);
+  assert.match(workflow, /node-version:\s*["']?24["']?/);
+  assert.match(workflow, /run:\s*npm ci/);
+  assert.match(workflow, /run:\s*npx playwright install --with-deps chromium/);
+  assert.match(workflow, /run:\s*npm run verify/);
+  assert.match(workflow, /uses:\s*actions\/configure-pages@v6/);
+  assert.match(workflow, /uses:\s*actions\/upload-pages-artifact@v5[\s\S]*path:\s*dist/);
+  assert.match(workflow, /uses:\s*actions\/deploy-pages@v5/);
+});
+
+test("Pages deployment uses least privileges and exposes its deployment URL", async () => {
+  const workflow = await read(".github/workflows/deploy.yml");
+
+  assert.match(
+    workflow,
+    /permissions:\s*\n\s+contents:\s*read\s*\n\s+pages:\s*write\s*\n\s+id-token:\s*write/,
+  );
+  assert.match(workflow, /concurrency:\s*\n\s+group:\s*pages\s*\n\s+cancel-in-progress:\s*false/);
+  assert.match(
+    workflow,
+    /environment:\s*\n\s+name:\s*github-pages\s*\n\s+url:\s*\$\{\{\s*steps\.deployment\.outputs\.page_url\s*\}\}/,
+  );
+  assert.match(workflow, /needs:\s*build/);
+  await assert.rejects(access(new URL("../.github/workflows/scrape_talks.yml", import.meta.url)));
 });
 
 test("site shell exposes accessible navigation and motion preferences", async () => {
@@ -75,10 +114,14 @@ test("search dialog exposes a safe accessible Pagefind interface", async () => {
 });
 
 test("generated verifier scales with additional posts", async () => {
-  const verifier = await read("scripts/verify-archive-build.mjs");
+  const verifier = await read("scripts/verify-build.mjs");
 
   assert.doesNotMatch(verifier, /page_count\s*,\s*1/);
   assert.match(verifier, /indexedPages\s*>=\s*1/);
+  assert.match(verifier, /readdir\([\s\S]*?recursive:\s*true/);
+  assert.match(verifier, /sitemap-index\.xml/);
+  assert.match(verifier, /你可以在此处添加/);
+  assert.match(verifier, /请填写/);
   assert.doesNotMatch(
     verifier,
     /for\s*\(const html of \[home, blog, cloudNative, openSource\]\)[\s\S]{0,500}kubecon-china-2025/,
