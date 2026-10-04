@@ -3,7 +3,12 @@ import test from "node:test";
 
 import * as postsModule from "../src/lib/posts.mjs";
 
-const { adjacentPosts, paginatePosts, publishedPosts } = postsModule;
+const {
+  adjacentPosts,
+  hasMeaningfulUpdate,
+  paginatePosts,
+  publishedPosts,
+} = postsModule;
 
 const syntheticPosts = (count) =>
   Array.from({ length: count }, (_, index) => ({
@@ -196,4 +201,24 @@ test("adjacentPosts rejects an index outside the collection", () => {
     name: "RangeError",
     message: "currentIndex must identify a post",
   });
+});
+
+test("hasMeaningfulUpdate suppresses times on the same UTC calendar day", () => {
+  assert.equal(
+    hasMeaningfulUpdate(
+      new Date("2025-06-14T01:00:00.000Z"),
+      new Date("2025-06-14T23:00:00.000Z"),
+    ),
+    false,
+  );
+});
+
+test("hasMeaningfulUpdate detects the next UTC calendar day", () => {
+  assert.equal(
+    hasMeaningfulUpdate(
+      new Date("2025-06-14T23:00:00.000Z"),
+      new Date("2025-06-15T00:00:00.000Z"),
+    ),
+    true,
+  );
 });

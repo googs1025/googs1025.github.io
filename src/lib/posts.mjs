@@ -88,6 +88,16 @@ export function adjacentPosts(posts, currentIndex) {
   };
 }
 
+function utcCalendarDate(date) {
+  return date.toISOString().slice(0, 10);
+}
+
+export function hasMeaningfulUpdate(pubDate, updatedDate) {
+  return Boolean(
+    updatedDate && utcCalendarDate(updatedDate) !== utcCalendarDate(pubDate),
+  );
+}
+
 export function postListItem(post) {
   const isExternal = Boolean(post.data.canonicalURL);
   const categories = post.data.categories.map((category) => ({

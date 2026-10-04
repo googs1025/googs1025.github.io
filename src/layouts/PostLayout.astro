@@ -4,6 +4,7 @@ import type { CollectionEntry } from "astro:content";
 
 import TableOfContents from "@/components/TableOfContents.astro";
 import BaseLayout from "@/layouts/BaseLayout.astro";
+import { hasMeaningfulUpdate } from "@/lib/posts.mjs";
 
 interface Props {
   post: CollectionEntry<"blog">;
@@ -20,8 +21,7 @@ const dateFormatter = new Intl.DateTimeFormat("zh-CN", {
   dateStyle: "long",
   timeZone: "UTC",
 });
-const showUpdatedDate = data.updatedDate
-  && data.updatedDate.getTime() !== data.pubDate.getTime();
+const showUpdatedDate = hasMeaningfulUpdate(data.pubDate, data.updatedDate);
 const postHref = (entry: CollectionEntry<"blog">) =>
   entry.data.canonicalURL ?? `/posts/${entry.id}/`;
 ---
