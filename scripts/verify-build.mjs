@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { access, readFile, readdir } from "node:fs/promises";
 
 import { PROFILE } from "../src/data/profile.mjs";
+import { assertHtmlFilesOmitTerms } from "./verify-build-lib.mjs";
 
 const readDist = (path) =>
   readFile(new URL(`../dist/${path}`, import.meta.url), "utf8");
@@ -53,27 +54,25 @@ await access(new URL("../dist/pagefind/pagefind.js", import.meta.url));
 const generatedHtmlFiles = (await readdir(new URL("../dist/", import.meta.url), {
   recursive: true,
 })).filter((path) => path.endsWith(".html"));
-const generatedHtml = (
-  await Promise.all(generatedHtmlFiles.map((path) => readDist(path)))
-).join("\n");
-
-for (const forbidden of [
-  "GitHub University",
-  "Version Control Theory",
-  "Skill 1",
-  "Professor Hub",
-  "academicpages",
-  "Second University",
-  "First University",
-  "Teaching experience 1",
-  "Portfolio item number 1",
-  "你可以在此处添加",
-  "请填写",
-  "TODO",
-  "TBD",
-]) {
-  assert.doesNotMatch(generatedHtml, new RegExp(escapeRegExp(forbidden), "i"));
-}
+await assertHtmlFilesOmitTerms(
+  generatedHtmlFiles,
+  [
+    "GitHub University",
+    "Version Control Theory",
+    "Skill 1",
+    "Professor Hub",
+    "academicpages",
+    "Second University",
+    "First University",
+    "Teaching experience 1",
+    "Portfolio item number 1",
+    "你可以在此处添加",
+    "请填写",
+    "TODO",
+    "TBD",
+  ],
+  readDist,
+);
 
 assert.match(home, /<html lang="zh-Hans"/);
 assert.match(home, /href="\/rss\.xml"/);

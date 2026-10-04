@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { access, readFile } from "node:fs/promises";
 import test from "node:test";
+import { parse } from "yaml";
 
 export const read = (path) =>
   readFile(new URL(`../${path}`, import.meta.url), "utf8");
@@ -26,6 +27,7 @@ test("Astro targets the production site and package scripts verify it", async ()
     "npm test && npm run check && npm run build && node scripts/verify-build.mjs && npm run test:e2e",
   );
   assert.equal(pkg.devDependencies["@playwright/test"], "^1.63.0");
+  assert.equal(pkg.devDependencies.yaml, "^2.9.1");
 });
 
 test("production verification entrypoint owns the complete generated-output checks", async () => {
@@ -41,35 +43,108 @@ test("production verification entrypoint owns the complete generated-output chec
   await assert.rejects(access(new URL("../scripts/verify-archive-build.mjs", import.meta.url)));
 });
 
-test("Pages deployment verifies master with current approved action majors", async () => {
-  const workflow = await read(".github/workflows/deploy.yml");
+const ACTION_PINS = [
+  [
+    "actions/checkout",
+    "3d3c42e5aac5ba805825da76410c181273ba90b1",
+    "v7.0.1",
+  ],
+  [
+    "actions/setup-node",
+    "820762786026740c76f36085b0efc47a31fe5020",
+    "v7.0.0",
+  ],
+  [
+    "actions/configure-pages",
+    "45bfe0192ca1faeb007ade9deae92b16b8254a0d",
+    "v6.0.0",
+  ],
+  [
+    "actions/upload-pages-artifact",
+    "fc324d3547104276b827a68afc52ff2a11cc49c9",
+    "v5.0.0",
+  ],
+  [
+    "actions/deploy-pages",
+    "368f82528645a54fb793d4d04e342629a3f51346",
+    "v5.0.1",
+  ],
+];
 
-  assert.match(workflow, /^on:\s*\n\s+push:\s*\n\s+branches:\s*\[master\]\s*$/m);
-  assert.match(workflow, /^\s+workflow_dispatch:\s*$/m);
-  assert.match(workflow, /uses:\s*actions\/checkout@v7/);
-  assert.match(workflow, /uses:\s*actions\/setup-node@v7/);
-  assert.match(workflow, /node-version:\s*["']?24["']?/);
-  assert.match(workflow, /run:\s*npm ci/);
-  assert.match(workflow, /run:\s*npx playwright install --with-deps chromium/);
-  assert.match(workflow, /run:\s*npm run verify/);
-  assert.match(workflow, /uses:\s*actions\/configure-pages@v6/);
-  assert.match(workflow, /uses:\s*actions\/upload-pages-artifact@v5[\s\S]*path:\s*dist/);
-  assert.match(workflow, /uses:\s*actions\/deploy-pages@v5/);
+test("Pages deployment parses with immutable official action releases", async () => {
+  const source = await read(".github/workflows/deploy.yml");
+  const workflow = parse(source);
+
+  assert.deepEqual(workflow.on, {
+    push: { branches: ["master"] },
+    workflow_dispatch: null,
+  });
+  assert.deepEqual(workflow.permissions, {});
+  assert.deepEqual(workflow.concurrency, {
+    group: "pages",
+    "cancel-in-progress": false,
+  });
+
+  for (const [repository, sha, release] of ACTION_PINS) {
+    assert.match(source, new RegExp(`uses: ${repository}@${sha} # ${release}`));
+  }
+  assert.doesNotMatch(source, /uses:\s*actions\/[^\s@]+@v\d/);
 });
 
-test("Pages deployment uses least privileges and exposes its deployment URL", async () => {
-  const workflow = await read(".github/workflows/deploy.yml");
+test("Pages build has read-only source access and no publication credentials", async () => {
+  const workflow = parse(await read(".github/workflows/deploy.yml"));
+  const build = workflow.jobs.build;
+  const checkout = build.steps.find(({ uses }) =>
+    uses?.startsWith("actions/checkout@"));
+  const setupNode = build.steps.find(({ uses }) =>
+    uses?.startsWith("actions/setup-node@"));
+  const upload = build.steps.find(({ uses }) =>
+    uses?.startsWith("actions/upload-pages-artifact@"));
 
-  assert.match(
-    workflow,
-    /permissions:\s*\n\s+contents:\s*read\s*\n\s+pages:\s*write\s*\n\s+id-token:\s*write/,
+  assert.equal(build["runs-on"], "ubuntu-latest");
+  assert.equal(build["timeout-minutes"], 30);
+  assert.deepEqual(build.permissions, { contents: "read" });
+  assert.equal(checkout.with["persist-credentials"], false);
+  assert.equal(setupNode.with["node-version"], 24);
+  assert.equal(setupNode.with.cache, "npm");
+  assert.deepEqual(build.steps.filter(({ run }) => run).map(({ run }) => run), [
+    "npm ci",
+    "npx playwright install --with-deps chromium",
+    "npm run verify",
+  ]);
+  assert.equal(upload.with.path, "dist");
+  assert.equal(
+    build.steps.some(({ uses }) => uses?.startsWith("actions/configure-pages@")),
+    false,
   );
-  assert.match(workflow, /concurrency:\s*\n\s+group:\s*pages\s*\n\s+cancel-in-progress:\s*false/);
-  assert.match(
-    workflow,
-    /environment:\s*\n\s+name:\s*github-pages\s*\n\s+url:\s*\$\{\{\s*steps\.deployment\.outputs\.page_url\s*\}\}/,
+  assert.equal(
+    build.steps.some(({ uses }) => uses?.startsWith("actions/deploy-pages@")),
+    false,
   );
-  assert.match(workflow, /needs:\s*build/);
+});
+
+test("Pages deploy alone receives publication credentials", async () => {
+  const workflow = parse(await read(".github/workflows/deploy.yml"));
+  const deploy = workflow.jobs.deploy;
+  const configureIndex = deploy.steps.findIndex(({ uses }) =>
+    uses?.startsWith("actions/configure-pages@"));
+  const deploymentIndex = deploy.steps.findIndex(({ uses }) =>
+    uses?.startsWith("actions/deploy-pages@"));
+
+  assert.equal(deploy.needs, "build");
+  assert.equal(deploy["runs-on"], "ubuntu-latest");
+  assert.equal(deploy["timeout-minutes"], 10);
+  assert.deepEqual(deploy.permissions, {
+    pages: "write",
+    "id-token": "write",
+  });
+  assert.deepEqual(deploy.environment, {
+    name: "github-pages",
+    url: "${{ steps.deployment.outputs.page_url }}",
+  });
+  assert.ok(configureIndex >= 0);
+  assert.ok(deploymentIndex > configureIndex);
+  assert.equal(deploy.steps[deploymentIndex].id, "deployment");
   await assert.rejects(access(new URL("../.github/workflows/scrape_talks.yml", import.meta.url)));
 });
 
@@ -122,6 +197,7 @@ test("generated verifier scales with additional posts", async () => {
   assert.match(verifier, /sitemap-index\.xml/);
   assert.match(verifier, /你可以在此处添加/);
   assert.match(verifier, /请填写/);
+  assert.doesNotMatch(verifier, /generatedHtml\s*=|\.join\(["']\\n["']\)/);
   assert.doesNotMatch(
     verifier,
     /for\s*\(const html of \[home, blog, cloudNative, openSource\]\)[\s\S]{0,500}kubecon-china-2025/,
