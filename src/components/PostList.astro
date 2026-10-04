@@ -1,0 +1,63 @@
+---
+import type { CollectionEntry } from "astro:content";
+
+interface Props {
+  posts: CollectionEntry<"blog">[];
+}
+
+const { posts } = Astro.props;
+---
+
+<ul class="post-list">
+  {
+    posts.map((post) => {
+      const isExternal = Boolean(post.data.canonicalURL);
+      const url = post.data.canonicalURL ?? `/posts/${post.id}/`;
+      const machineDate = post.data.pubDate.toISOString();
+      const humanDate = post.data.pubDate.toLocaleDateString("zh-CN", {
+        dateStyle: "long",
+        timeZone: "UTC",
+      });
+
+      return (
+        <li>
+          <article>
+            <h2 class="post-title">
+              <a
+                href={url}
+                target={isExternal ? "_blank" : undefined}
+                rel={isExternal ? "noreferrer" : undefined}
+                aria-label={
+                  isExternal
+                    ? `${post.data.title}（外部链接，将在新标签页打开）`
+                    : undefined
+                }
+              >
+                {post.data.title}
+              </a>
+              {isExternal && <span class="badge external-badge">External</span>}
+            </h2>
+            <div class="post-meta">
+              <time datetime={machineDate}>{humanDate}</time>
+              {
+                post.data.categories.length > 0 && (
+                  <span class="post-categories" aria-label="文章分类">
+                    {post.data.categories.map((category) => (
+                      <a
+                        class="badge"
+                        href={`/categories/${encodeURIComponent(category)}/`}
+                      >
+                        {category}
+                      </a>
+                    ))}
+                  </span>
+                )
+              }
+            </div>
+            <p class="post-description">{post.data.description}</p>
+          </article>
+        </li>
+      );
+    })
+  }
+</ul>

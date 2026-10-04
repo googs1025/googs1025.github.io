@@ -1,0 +1,49 @@
+---
+import { getCollection, type CollectionEntry } from "astro:content";
+
+import PostList from "@/components/PostList.astro";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { paginatePosts, publishedPosts } from "@/lib/posts.mjs";
+
+interface Props {
+  posts: CollectionEntry<"blog">[];
+  currentPage: number;
+  totalPages: number;
+}
+
+export async function getStaticPaths() {
+  const published = publishedPosts(await getCollection("blog"));
+  const totalPages = Math.max(1, Math.ceil(published.length / 10));
+  const start = 2;
+
+  return Array.from({ length: Math.max(totalPages - 1, 0) }, (_, index) => {
+    const currentPage = index + start;
+    const page = paginatePosts(published, currentPage, 10);
+
+    return {
+      params: { page: String(currentPage) },
+      props: {
+        posts: page.items,
+        currentPage: page.currentPage,
+        totalPages: page.totalPages,
+      },
+    };
+  });
+}
+
+const { posts, currentPage, totalPages } = Astro.props;
+const previousURL = currentPage === 2 ? "/blog/" : `/blog/${currentPage - 1}/`;
+const nextURL = currentPage < totalPages ? `/blog/${currentPage + 1}/` : undefined;
+---
+
+<BaseLayout title={`全部文章 · 第 ${currentPage} 页`}>
+  <section class="content" aria-labelledby="page-title">
+    <h1 id="page-title">全部文章</h1>
+    <PostList posts={posts} />
+    <nav aria-label="文章分页" class="pagination">
+      <a href={previousURL} rel="prev">上一页</a>
+      <span aria-current="page">第 {currentPage} 页</span>
+      {nextURL && <a href={nextURL} rel="next">下一页</a>}
+    </nav>
+  </section>
+</BaseLayout>

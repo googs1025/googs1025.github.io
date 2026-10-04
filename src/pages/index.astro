@@ -1,10 +1,20 @@
 ---
+import { getCollection } from "astro:content";
+
+import PostList from "@/components/PostList.astro";
 import BaseLayout from "@/layouts/BaseLayout.astro";
+import { publishedPosts } from "@/lib/posts.mjs";
+
+const posts = publishedPosts(await getCollection("blog")).slice(0, 10);
 ---
 
 <BaseLayout>
   <section class="content" aria-labelledby="page-title">
     <h1 id="page-title">文章</h1>
-    <p>记录 Kubernetes 调度、云原生基础设施与 LLM 推理平台实践。</p>
+    {
+      posts.length > 0
+        ? <PostList posts={posts} />
+        : <p class="empty-state">这里还没有已发布的文章。</p>
+    }
   </section>
 </BaseLayout>

@@ -380,8 +380,30 @@ td {
   margin: 0 0 0.45rem;
 }
 
+.post-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.45rem;
+}
+
+.post-title > a {
+  color: var(--foreground);
+  text-decoration-color: var(--border);
+}
+
+.post-title > a:hover {
+  color: var(--accent);
+  text-decoration-color: currentColor;
+}
+
 .post-list p:last-child {
   margin-bottom: 0;
+}
+
+.post-description {
+  margin-top: 0.65rem;
+  color: var(--muted);
 }
 
 .post-meta {
@@ -390,6 +412,12 @@ td {
   gap: 0.4rem 0.75rem;
   color: var(--muted);
   font-size: 0.85rem;
+}
+
+.post-categories {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
 }
 
 .badge {
@@ -408,6 +436,28 @@ td {
 .badge:hover {
   border-color: var(--accent);
   color: var(--accent);
+}
+
+.external-badge {
+  color: var(--accent);
+}
+
+.empty-state {
+  color: var(--muted);
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border);
+}
+
+.pagination span {
+  color: var(--muted);
 }
 
 .skip-link {
