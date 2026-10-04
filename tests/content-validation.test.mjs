@@ -9,7 +9,7 @@ import {
 
 test("isHttpUrl accepts absolute HTTP and HTTPS URLs", () => {
   for (const value of [
-    "https://example.com/posts/kubecon",
+    "https://example.com/posts/sample-entry",
     "http://localhost:4321/archive?page=2#posts",
   ]) {
     assert.equal(isHttpUrl(value), true, value);
@@ -22,7 +22,7 @@ test("isHttpUrl rejects non-HTTP and non-absolute URLs", () => {
     "data:text/plain,hello",
     "mailto:hello@example.com",
     "//example.com/posts",
-    "/posts/kubecon",
+    "/posts/sample-entry",
   ]) {
     assert.equal(isHttpUrl(value), false, value);
   }
@@ -31,7 +31,7 @@ test("isHttpUrl rejects non-HTTP and non-absolute URLs", () => {
 test("isLegacyPath accepts same-origin pathnames including Chinese paths", () => {
   for (const value of [
     "/",
-    "/posts/2025/06/14/kubecon-2025-experience/",
+    "/posts/2025/01/02/sample-entry/",
     "/文章/云原生/",
     "/%E4%BA%91%E5%8E%9F%E7%94%9F/",
   ]) {
@@ -41,7 +41,7 @@ test("isLegacyPath accepts same-origin pathnames including Chinese paths", () =>
 
 test("isLegacyPath rejects external, malformed, and traversal paths", () => {
   for (const value of [
-    "posts/kubecon",
+    "posts/sample-entry",
     "//example.com/posts",
     "/posts/../admin",
     "/posts/./draft",

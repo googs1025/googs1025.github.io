@@ -12,14 +12,14 @@
 
 ## Safety and file map
 
-The working tree already contains user work in `_posts/我的 KubeCon China 2025 参与之旅.md` and `images/kubecon2025/`. Never restore or overwrite it. Migrate the current on-disk versions and verify them before removing Jekyll sources.
+Publication override: the site owner explicitly excluded “我的 KubeCon China 2025 参与之旅” and all related images, routes, feeds, search records, and sitemap entries from this feature worktree and generated site. Authentic originals remain in the parent checkout and verified external backup. Preserve the generic post, category, RSS, search, and legacy-URL architecture for future approved posts.
 
 The current `_pages/cv.md` and `_data/cv.json` are demo content. The new CV may use only verified facts from the current About page, configuration, and approved design.
 
 ```text
 astro.config.mjs                         Astro and sitemap configuration
 package.json / package-lock.json         dependencies and commands
-public/images/                           profile and migrated post images
+public/images/                           approved public images
 scripts/verify-build.mjs                 production-output contract
 tests/*.test.mjs                         unit and source contracts
 src/content.config.ts                    post schema
@@ -113,9 +113,9 @@ git add .gitignore package.json package-lock.json astro.config.mjs tsconfig.json
 git commit -m "build: establish Astro site foundation"
 ```
 
-### Task 2: Validate posts and migrate the authentic article
+### Task 2: Validate the generic post architecture and publication boundary
 
-**Files:** Create `src/content.config.ts`, `src/lib/posts.mjs`, `tests/posts.test.mjs`, `tests/content.test.mjs`, `src/content/blog/kubecon-china-2025.md`, `public/images/kubecon2025/*.png`.
+**Files:** Create `src/content.config.ts`, `src/lib/posts.mjs`, `tests/posts.test.mjs`, and `tests/content.test.mjs`; keep `src/content/blog/` ready for future approved entries.
 
 - [ ] **Step 1: Write failing post utility tests**
 
@@ -158,46 +158,25 @@ const blog=defineCollection({loader:glob({base:"./src/content/blog",pattern:"**/
 export const collections={blog};
 ```
 
-- [ ] **Step 4: Write the failing migration contract**
+- [ ] **Step 4: Write the failing publication-safety contract**
 
-```js
-// tests/content.test.mjs
-import assert from "node:assert/strict";
-import { access,readFile } from "node:fs/promises";
-import test from "node:test";
-const path=new URL("../src/content/blog/kubecon-china-2025.md",import.meta.url);
-test("post is normalized and contains no prompts",async()=>{const post=await readFile(path,"utf8");assert.match(post,/pubDate: 2025-06-14/);assert.match(post,/\/posts\/2025\/06\/14\/kubecon-2025-experience\//);assert.doesNotMatch(post,/你可以在此处添加|请填写|TODO|TBD/);});
-test("referenced images exist",async()=>{const post=await readFile(path,"utf8");const refs=[...post.matchAll(/!\[[^\]]+\]\((\/images\/kubecon2025\/[^)]+)\)/g)].map(x=>x[1]);assert.ok(refs.length>0);await Promise.all(refs.map(x=>access(new URL(`../public${x}`,import.meta.url))));});
-```
+Assert that the current content collection contains zero Markdown entries and scan production content, public assets, and route sources for a denylist covering the explicitly excluded article title, slug, dated route, and image directory. Keep those strings only in the test denylist and generated-output verifier.
 
 Run: `node --test tests/content.test.mjs`
 
-Expected: FAIL because the Astro post is absent.
+Expected: FAIL while any excluded publication source, route, asset, or article-specific fixture remains.
 
-- [ ] **Step 5: Migrate article and images**
+- [ ] **Step 5: Enforce the publication override**
 
-Copy the current 16 PNG files to `public/images/kubecon2025/`. Create the Astro post from the current on-disk Jekyll post using:
-
-```yaml
----
-title: "我的 KubeCon China 2025 参与之旅"
-description: "分享我第一次参加 KubeCon China 2025 的现场体验、社区交流和技术观察。"
-pubDate: 2025-06-14
-updatedDate: 2025-06-14
-categories: [云原生, 开源社区]
-legacyURLs: [/posts/2025/06/14/kubecon-2025-experience/]
----
-```
-
-Preserve all authored prose and current uncommitted edits. Remove the duplicate H1 and authoring-prompt blockquotes. Rewrite each image URL under `/images/kubecon2025/` while retaining its original basename, and add factual alt text derived from adjacent prose.
+Remove the excluded article, related public image directory, explicit dated compatibility route, and article-specific checksum fixture from the feature worktree. Keep the authentic originals outside the worktree and leave the generic schema and helpers intact.
 
 - [ ] **Step 6: Verify and commit**
 
 Run: `npm test && npm run check`
 
 ```bash
-git add src/content.config.ts src/lib/posts.mjs src/content/blog public/images/kubecon2025 tests/posts.test.mjs tests/content.test.mjs
-git commit -m "content: migrate blog post to Astro collection"
+git add src/content.config.ts src/lib/posts.mjs src/content/blog tests/posts.test.mjs tests/content.test.mjs
+git commit -m "content: enforce publication boundary"
 ```
 
 ### Task 3: Build the Calm Teal site shell
@@ -270,20 +249,20 @@ Both load `getCollection("blog")` and pass it through `publishedPosts`. Home ren
 
 Run: `npm test && npm run check && npm run build`
 
-Expected: pass; `dist/index.html`, `dist/blog/index.html`, and `dist/categories/云原生/index.html` exist.
+Expected: pass; `dist/index.html` and `dist/blog/index.html` show the intentional empty state, with no category pages until approved posts exist.
 
 ```bash
 git add src/components/PostList.astro src/pages/index.astro src/pages/blog src/pages/categories tests/source-contract.test.mjs
 git commit -m "feat: add blog and category archives"
 ```
 
-### Task 5: Build article reading and old-URL compatibility
+### Task 5: Build the reusable article reading architecture
 
-**Files:** Create `src/components/TableOfContents.astro`, `src/layouts/PostLayout.astro`, `src/pages/posts/[...slug].astro`, `src/pages/posts/2025/06/14/kubecon-2025-experience/index.astro`; modify `tests/source-contract.test.mjs`.
+**Files:** Create `src/components/TableOfContents.astro`, `src/layouts/PostLayout.astro`, and `src/pages/posts/[...slug].astro`; modify `tests/source-contract.test.mjs`.
 
 - [ ] **Step 1: Add failing reader contracts**
 
-Append assertions that PostLayout contains `<article`, `<time`, `data-pagefind-body`, `aria-label="文章导航"`, and `TableOfContents`; assert the legacy page contains a canonical link and visible fallback to `/posts/kubecon-china-2025/`. Run `npm test`; expect failure.
+Append assertions that PostLayout contains `<article`, `<time`, `data-pagefind-body`, `aria-label="文章导航"`, and `TableOfContents`; assert the dynamic route uses the content collection and deterministic adjacency helpers. Run `npm test`; expect failure.
 
 - [ ] **Step 2: Implement table of contents and post layout**
 
@@ -293,24 +272,15 @@ TableOfContents accepts Astro `headings`, retains depth 2/3, returns nothing for
 
 `src/pages/posts/[...slug].astro` loads and sorts published posts. `getStaticPaths()` excludes entries with `canonicalURL`, returns each `post.id`, and supplies adjacent posts. Use `const { Content, headings } = await render(post)` and render them through PostLayout.
 
-- [ ] **Step 4: Create the exact compatibility page**
+- [ ] **Step 4: Preserve future legacy compatibility**
 
-```astro
----
-import BaseLayout from "@/layouts/BaseLayout.astro";
-const destination="/posts/kubecon-china-2025/";
----
-<BaseLayout title="文章已迁移" canonical={new URL(destination,Astro.site)}>
-  <meta slot="head" http-equiv="refresh" content={`0; url=${destination}`} />
-  <div class="content prose"><h1>文章已迁移</h1><p>正在前往新地址。若浏览器没有自动跳转，请<a href={destination}>继续阅读</a>。</p></div>
-</BaseLayout>
-```
+Keep `legacyURLs` in the content schema and the BaseLayout head slot needed by future compatibility pages. Add a compatibility route only when a future approved post declares one; the current zero-post site generates no post or legacy directories.
 
 - [ ] **Step 5: Verify and commit**
 
 Run: `npm test && npm run check && npm run build`
 
-Expected: both canonical and dated article paths exist.
+Expected: the reusable article route compiles and the current zero-post build emits no post routes.
 
 ```bash
 git add src/components/TableOfContents.astro src/layouts/PostLayout.astro src/pages/posts tests/source-contract.test.mjs
@@ -396,21 +366,9 @@ git commit -m "feat: add static search and RSS"
 
 **Files:** Create `scripts/verify-build.mjs`, `.github/workflows/deploy.yml`; replace `README.md`; remove `.github/workflows/scrape_talks.yml`.
 
-- [ ] **Step 1: Create the exact generated-output verifier**
+- [ ] **Step 1: Create the generated-output verifier**
 
-```js
-// scripts/verify-build.mjs
-import assert from "node:assert/strict";
-import { access,readFile } from "node:fs/promises";
-const required=["dist/index.html","dist/blog/index.html","dist/about/index.html","dist/cv/index.html","dist/404.html","dist/rss.xml","dist/sitemap-index.xml","dist/pagefind/pagefind.js","dist/posts/kubecon-china-2025/index.html","dist/posts/2025/06/14/kubecon-2025-experience/index.html"];
-await Promise.all(required.map(access));
-const html=await Promise.all(required.filter(x=>x.endsWith(".html")).map(x=>readFile(x,"utf8")));
-const output=html.join("\n");
-for(const forbidden of ["GitHub University","Version Control Theory","academicpages","Teaching experience 1","Portfolio item number 1","你可以在此处添加","请填写"])assert.doesNotMatch(output,new RegExp(forbidden));
-assert.match(html[0],/lang="zh-Hans"/);assert.match(html[0],/href="\/rss.xml"/);assert.match(html[0],/data-theme-toggle/);
-assert.match(output,/data-pagefind-body/);assert.match(output,/\/images\/kubecon2025\//);
-console.log(`Verified ${required.length} production artifacts.`);
-```
+Verify required shell/profile/feed/sitemap/search artifacts, derive the published post count from the content collection, and compare it with RSS and generated routes. For the current zero-post repository, require intentional Home and Blog empty states, zero RSS items, and no post/category/legacy directories. Recursively scan every generated filename and file body for the publication denylist. Require the About page to carry `data-pagefind-body` and Pagefind to index at least one page. Keep the checks content-count agnostic so future approved posts do not invalidate the verifier.
 
 - [ ] **Step 2: Run `npm run verify`**
 
@@ -482,9 +440,9 @@ git add .github/workflows/deploy.yml .github/workflows/scrape_talks.yml scripts/
 git commit -m "ci: deploy verified Astro site to Pages"
 ```
 
-### Task 9: Remove Jekyll only after successful migration
+### Task 9: Remove Jekyll only after publication safety is verified
 
-**Files:** Remove only listed Jekyll/template files; preserve `docs/`, Astro sources, migrated assets, license, and unrelated user files.
+**Files:** Remove only listed Jekyll/template files; preserve `docs/`, Astro sources, approved assets, license, and unrelated user files.
 
 - [ ] **Step 1: Gate destructive cleanup on a green build**
 
@@ -492,17 +450,17 @@ Run: `npm run verify`
 
 Expected: PASS. Stop if it fails.
 
-- [ ] **Step 2: Prove user content is migrated**
+- [ ] **Step 2: Prove excluded content is preserved externally and absent publicly**
 
 Run:
 
 ```bash
-test -f src/content/blog/kubecon-china-2025.md
-test "$(find public/images/kubecon2025 -type f | wc -l | tr -d ' ')" = "16"
-rg -n 'KubeCon|开源社区|技术大会' src/content/blog/kubecon-china-2025.md
+test -d /private/tmp/googs1025-kubecon-source-backup-20261004T152054Z-29185
+test "$(find /private/tmp/googs1025-kubecon-source-backup-20261004T152054Z-29185 -type f | wc -l | tr -d ' ')" = "16"
+npm test
 ```
 
-Expected: article exists, all 16 images exist, and authentic subject matter is present.
+Expected: the backup contains all 16 originals and publication-safety tests pass with zero current entries.
 
 - [ ] **Step 3: Remove tracked Jekyll/template paths with recoverable Git deletion**
 
@@ -516,7 +474,7 @@ talkmap.py talkmap.ipynb talkmap_out.ipynb scripts/cv_markdown_to_json.py
 scripts/update_cv_json.sh scripts/verify_homepage_refresh.sh
 ```
 
-Remove obsolete root demo images only after checking `public/images/profile.jpg`, `public/favicon.svg`, and migrated KubeCon assets. Do not delete `docs/`, `.git`, `.github/workflows/deploy.yml`, `src/`, `public/`, or files outside the explicit legacy set.
+Remove obsolete root demo images only after checking `public/images/profile.jpg` and `public/favicon.svg`. Do not delete `docs/`, `.git`, `.github/workflows/deploy.yml`, `src/`, `public/`, or files outside the explicit legacy set.
 
 - [ ] **Step 4: Check for leaked template references**
 
@@ -545,7 +503,7 @@ Expected: a local URL serving `dist/`.
 
 - [ ] **Step 2: Check primary routes at desktop width**
 
-Inspect `/`, `/blog/`, `/about/`, `/cv/`, `/posts/kubecon-china-2025/`, the dated legacy URL, and a missing URL. Verify hierarchy, images, links, canonical redirect, TOC, and 404 recovery.
+Inspect `/`, `/blog/`, `/about/`, `/cv/`, and a missing URL. Verify the empty-state hierarchy, profile image, links, searchable About content, and 404 recovery; verify excluded post routes return 404 and are absent from generated output.
 
 - [ ] **Step 3: Check mobile and interactions**
 
@@ -573,8 +531,8 @@ Stage exact fixed files and run `git commit -m "fix: polish responsive blog expe
 
 - `npm run verify` passes on the Astro-only site.
 - Home is the approved Calm Teal article list.
-- Blog, category, post, About, CV, 404, dark mode, search, RSS, sitemap, and legacy URL work.
-- The current KubeCon article and all 16 images survive migration without authoring prompts.
+- Home and Blog intentionally support zero entries; generic category, post, RSS, search, and legacy-URL architecture remains ready for future approved posts.
+- The explicitly excluded KubeCon article, routes, feed/search/sitemap references, and all 16 images are absent from published source and output while originals remain outside the feature worktree.
 - No Academic Pages demo content appears in production output.
 - GitHub Pages deployment is defined and uses the verified `dist/` artifact.
 - No unrelated user work is discarded.

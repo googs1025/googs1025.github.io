@@ -124,13 +124,13 @@ test("search dialog initializes once, debounces, renders, and restores focus", a
   assert.equal(imports, 1);
   assert.equal(initializations, 1);
 
-  ui.input.value = "KubeCon";
+  ui.input.value = "Kubernetes";
   ui.input.dispatch("input");
   assert.equal(ui.timers.at(-1).delay, 150);
   assert.equal(ui.status.textContent, "正在搜索…");
   ui.timers.at(-1).callback();
   await settle();
-  assert.deepEqual(ui.results.children, ["KubeCon result"]);
+  assert.deepEqual(ui.results.children, ["Kubernetes result"]);
   assert.equal(ui.status.textContent, "找到 1 篇相关文章");
 
   const escape = ui.dialog.dispatch("keydown", { key: "Escape" });

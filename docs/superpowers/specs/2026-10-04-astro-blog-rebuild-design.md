@@ -136,26 +136,15 @@ The About page presents a compact profile rather than a second homepage. It incl
 
 The current Jekyll CV sources contain Academic Pages demonstration data rather than the site owner's resume. The new CV page therefore uses only verified facts already present in the site: identity, current cloud native engineering focus, previous ByteDance cloud platform experience, technical areas, and established open source roles. It must not invent dates, education, employers, titles, or achievements that are not supported by the source content. The 404 page includes the normal header, a concise message, and paths back to Home and Blog.
 
-## Content Migration
+## Content Policy
 
-Migrate only authentic site content:
+Publish only content that the site owner has explicitly approved. Personal biography, verified links, owned profile imagery, and supported professional facts remain in scope. Demo publications, talks, teaching entries, portfolio examples, placeholder images, sample comments, and Academic Pages documentation remain excluded.
 
-- The existing KubeCon China 2025 post and its images.
-- Current personal biography and verified links.
-- Profile imagery that belongs to the site owner.
-- Verified professional facts from the current homepage and site configuration.
+Future approved posts use the Astro schema, canonical paths under `/posts/<slug>/`, and optional declared legacy URLs. Compatibility pages may use canonical metadata, an immediate client-side redirect, and a visible fallback link.
 
-Do not migrate demo publications, talks, teaching entries, portfolio examples, placeholder images, sample comments, or Academic Pages documentation pages.
+### Publication override
 
-During migration:
-
-- Normalize post frontmatter to the Astro schema.
-- Preserve meaningful headings, links, code, and image order.
-- Add accurate alternative text where the existing source permits it.
-- Record the current public Jekyll post path in `legacyURLs`.
-- Use a new canonical post path under `/posts/<slug>/`.
-
-Legacy compatibility pages should use canonical metadata and an immediate client-side redirect with a visible fallback link. This works on GitHub Pages without requiring server-side redirect rules.
+The site owner explicitly excluded the article “我的 KubeCon China 2025 参与之旅” and all of its images from published source and generated output. Its post route, dated compatibility route, sitemap references, search entry, RSS item, and public assets must not ship. Authentic originals remain outside this feature worktree in the parent checkout and the verified backup; they are preserved there rather than copied into the public tree.
 
 ## Search, Theme, and RSS
 
@@ -203,8 +192,8 @@ Before the rebuild is considered complete:
 
 - Astro type and content checks pass.
 - The production site and search index build successfully.
-- Markdown content and RSS output render correctly.
-- Internal links and declared legacy URLs resolve.
+- Approved Markdown content and RSS output render correctly, including the valid zero-post state.
+- Internal links and any future declared legacy URLs resolve.
 - No Academic Pages demo content appears in generated output.
 - Home, Blog, About, CV, post, search, and 404 views are checked at desktop and mobile widths.
 - Light and dark themes are checked for each primary template.
@@ -213,7 +202,7 @@ Before the rebuild is considered complete:
 
 ## Scope Boundaries
 
-This rebuild includes the static blog, content migration, search, theme support, RSS, responsive behavior, accessibility work, legacy post compatibility, and GitHub Pages deployment.
+This rebuild includes the static blog architecture, approved content, search, theme support, RSS, responsive behavior, accessibility work, optional legacy post compatibility, and GitHub Pages deployment.
 
 It does not include a CMS, server-side API, analytics migration, comments, multilingual duplication, user accounts, dynamic reactions, or new editorial content beyond the existing authentic material.
 

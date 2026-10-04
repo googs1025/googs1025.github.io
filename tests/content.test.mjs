@@ -1,76 +1,70 @@
 import assert from "node:assert/strict";
-import { createHash } from "node:crypto";
-import { access, readFile, readdir } from "node:fs/promises";
+import { access, readFile, readdir, stat } from "node:fs/promises";
 import test from "node:test";
 
-const postPath = new URL(
-  "../src/content/blog/kubecon-china-2025.md",
-  import.meta.url,
-);
+const repositoryRoot = new URL("../", import.meta.url);
+const blogRoot = new URL("src/content/blog/", repositoryRoot);
 
-test("the migrated KubeCon post has normalized metadata and no authoring prompts", async () => {
-  const post = await readFile(postPath, "utf8");
+// Publication denylist: these markers must never appear in production sources,
+// public assets, route sources, or generated output.
+const forbiddenPublicationMarkers = [
+  "我的 KubeCon China 2025 参与之旅",
+  "kubecon-china-2025",
+  "posts/2025/06/14/kubecon-2025-experience",
+  "/images/kubecon2025",
+];
 
-  assert.match(post, /^pubDate: 2025-06-14$/m);
-  assert.match(
-    post,
-    /^\s*- \/posts\/2025\/06\/14\/kubecon-2025-experience\/$/m,
+const productionRoots = ["src/content/blog", "public", "src/pages"];
+
+test("the current repository publishes zero blog entries", async () => {
+  const entries = (await readdir(blogRoot, { recursive: true })).filter((path) =>
+    /\.(?:md|mdx)$/.test(path),
   );
 
-  for (const marker of ["你可以在此处添加", "请填写", "TODO", "TBD"]) {
-    assert.doesNotMatch(post, new RegExp(marker));
+  assert.deepEqual(entries, []);
+});
+
+test("production sources contain no excluded article, route, or asset markers", async () => {
+  for (const root of productionRoots) {
+    const rootUrl = new URL(`${root}/`, repositoryRoot);
+    const files = await readdir(rootUrl, { recursive: true });
+
+    for (const relativePath of files) {
+      const repositoryPath = `${root}/${relativePath}`;
+      const normalizedPath = repositoryPath.toLowerCase();
+
+      for (const marker of forbiddenPublicationMarkers) {
+        const normalizedMarker = marker.toLowerCase();
+        assert.equal(
+          normalizedPath.includes(normalizedMarker),
+          false,
+          `forbidden publication marker found in path: ${repositoryPath}`,
+        );
+      }
+
+      const pathUrl = new URL(relativePath, rootUrl);
+      if (!(await stat(pathUrl)).isFile()) {
+        continue;
+      }
+
+      const normalizedContents = (await readFile(pathUrl))
+        .toString("utf8")
+        .toLowerCase();
+      for (const marker of forbiddenPublicationMarkers) {
+        const normalizedMarker = marker.toLowerCase();
+        assert.equal(
+          normalizedContents.includes(normalizedMarker),
+          false,
+          `forbidden publication marker found in file: ${repositoryPath}`,
+        );
+      }
+    }
   }
 });
 
-test("every KubeCon image referenced by the migrated post exists in public", async () => {
-  const post = await readFile(postPath, "utf8");
-  const imageReferences = [
-    ...post.matchAll(/!\[([^\]]*)\]\(([^)\s]+)\)/g),
-  ].map((match) => ({ alt: match[1], path: match[2] }));
-
-  assert.ok(
-    imageReferences.length > 0,
-    "expected at least one KubeCon image reference",
-  );
-
-  for (const image of imageReferences) {
-    assert.ok(image.alt.trim(), `expected nonempty alt text for ${image.path}`);
-    assert.match(image.path, /^\/images\/kubecon2025\//);
-  }
-
-  await Promise.all(
-    imageReferences.map(({ path }) =>
-      access(new URL(`../public${path}`, import.meta.url)),
-    ),
-  );
-});
-
-test("all 16 public KubeCon PNGs match tracked checksums", async () => {
-  const manifestPath = new URL(
-    "./fixtures/kubecon2025-sha256.json",
-    import.meta.url,
-  );
-  const publicDirectory = new URL(
-    "../public/images/kubecon2025/",
-    import.meta.url,
-  );
-  const expectedChecksums = JSON.parse(await readFile(manifestPath, "utf8"));
-  const expectedNames = Object.keys(expectedChecksums).sort();
-  const publicNames = (await readdir(publicDirectory, { withFileTypes: true }))
-    .filter((entry) => entry.isFile() && entry.name.endsWith(".png"))
-    .map((entry) => entry.name)
-    .sort();
-
-  assert.equal(expectedNames.length, 16);
-  assert.equal(publicNames.length, 16);
-  assert.deepEqual(publicNames, expectedNames);
-
-  await Promise.all(
-    publicNames.map(async (name) => {
-      const publicImage = await readFile(new URL(name, publicDirectory));
-      const checksum = createHash("sha256").update(publicImage).digest("hex");
-
-      assert.equal(checksum, expectedChecksums[name], `${name} checksum differs`);
-    }),
+test("article-specific checksum fixture is not part of the repository", async () => {
+  await assert.rejects(
+    access(new URL("tests/fixtures/kubecon2025-sha256.json", repositoryRoot)),
+    { code: "ENOENT" },
   );
 });

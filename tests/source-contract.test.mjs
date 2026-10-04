@@ -11,11 +11,8 @@ test("Astro targets the production site and package scripts verify it", async ()
   const pkg = JSON.parse(await read("package.json"));
 
   assert.match(config, /site:\s*["']https:\/\/googs1025\.github\.io["']/);
-  assert.match(config, /sitemap\(\{[\s\S]*filter:/);
-  assert.match(
-    config,
-    /\/posts\/2025\/06\/14\/kubecon-2025-experience\//,
-  );
+  assert.match(config, /sitemap\(\)/);
+  assert.doesNotMatch(config, /SITEMAP_EXCLUDED_PATHS|kubecon-2025-experience/);
   assert.equal(pkg.scripts.test, "node --test tests/*.test.mjs");
   assert.equal(
     pkg.scripts.build,
@@ -194,14 +191,15 @@ test("generated verifier scales with additional posts", async () => {
   assert.doesNotMatch(verifier, /page_count\s*,\s*1/);
   assert.match(verifier, /indexedPages\s*>=\s*1/);
   assert.match(verifier, /readdir\([\s\S]*?recursive:\s*true/);
+  assert.match(verifier, /publishedEntries\.length/);
+  assert.match(verifier, /rssItems\.length/);
+  assert.match(verifier, /forbiddenPublicationMarkers/);
+  assert.match(verifier, /publishedEntries\.length\s*===\s*0/);
   assert.match(verifier, /sitemap-index\.xml/);
   assert.match(verifier, /你可以在此处添加/);
   assert.match(verifier, /请填写/);
   assert.doesNotMatch(verifier, /generatedHtml\s*=|\.join\(["']\\n["']\)/);
-  assert.doesNotMatch(
-    verifier,
-    /for\s*\(const html of \[home, blog, cloudNative, openSource\]\)[\s\S]{0,500}kubecon-china-2025/,
-  );
+  assert.doesNotMatch(verifier, /categories\/云原生|categories\/开源社区/);
 });
 
 test("Playwright runs production search and no-JS smoke tests", async () => {
@@ -214,7 +212,9 @@ test("Playwright runs production search and no-JS smoke tests", async () => {
   assert.match(config, /npm run preview -- --host 127\.0\.0\.1/);
   assert.match(config, /baseURL:\s*["']http:\/\/127\.0\.0\.1:4321["']/);
   assert.match(smoke, /javaScriptEnabled:\s*false/);
-  assert.match(smoke, /KubeCon/);
+  assert.match(smoke, /Kubernetes/);
+  assert.match(smoke, /name:\s*["']江振瑜["']/);
+  assert.match(smoke, /href\)\.toBe\(["']\/about\/["']\)/);
   assert.match(smoke, /press\(["']Escape["']\)/);
   assert.match(gitignore, /^test-results\/$/m);
   assert.match(gitignore, /^playwright-report\/$/m);
@@ -424,16 +424,12 @@ test("post routes render local published entries with deterministic adjacent pos
   assert.match(page, /<Content\s*\/>/);
 });
 
-test("legacy KubeCon URL declares the destination and a visible fallback link", async () => {
-  const [legacyPage, baseLayout] = await Promise.all([
-    read("src/pages/posts/2025/06/14/kubecon-2025-experience/index.astro"),
-    read("src/layouts/BaseLayout.astro"),
-  ]);
+test("About marks its meaningful profile content for Pagefind", async () => {
+  const about = await read("src/pages/about.astro");
 
-  assert.match(legacyPage, /destination\s*=\s*["']\/posts\/kubecon-china-2025\/["']/);
-  assert.match(legacyPage, /canonical=\{canonicalURL\}/);
-  assert.match(legacyPage, /http-equiv=["']refresh["']/);
-  assert.match(legacyPage, /href=\{destination\}/);
-  assert.match(legacyPage, />继续阅读<\/a>/);
-  assert.match(baseLayout, /<slot\s+name=["']head["']\s*\/>/);
+  assert.match(
+    about,
+    /<article\s+class=["']content profile-page["']\s+data-pagefind-body>/,
+  );
+  assert.match(about, /PROFILE\.technicalFocus/);
 });
