@@ -424,6 +424,16 @@ test("post routes render local published entries with deterministic adjacent pos
   assert.match(page, /<Content\s*\/>/);
 });
 
+test("legacy routes render validated immediate compatibility pages", async () => {
+  const page = await read("src/pages/[...legacy].astro");
+
+  assert.match(page, /legacyRedirectPaths\(posts\)/);
+  assert.match(page, /canonical=\{target\}/);
+  assert.match(page, /http-equiv=["']refresh["']/);
+  assert.match(page, /content=\{`0;url=\$\{target\}`\}/);
+  assert.match(page, /<a\s+href=\{target\}>前往文章的新地址<\/a>/);
+});
+
 test("About marks its meaningful profile content for Pagefind", async () => {
   const about = await read("src/pages/about.astro");
 

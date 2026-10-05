@@ -4,7 +4,12 @@ import { access, readFile, readdir, stat } from "node:fs/promises";
 import { parse } from "yaml";
 
 import { PROFILE } from "../src/data/profile.mjs";
-import { assertHtmlFilesOmitTerms } from "./verify-build-lib.mjs";
+import {
+  assertExactPathSet,
+  assertHtmlFilesOmitTerms,
+  assertLegacyRedirectHtml,
+  routePathToHtmlFile,
+} from "./verify-build-lib.mjs";
 
 const repositoryRoot = new URL("../", import.meta.url);
 const distRoot = new URL("dist/", repositoryRoot);
@@ -160,19 +165,50 @@ for (const html of [home, blog]) {
 }
 
 const generatedPostPages = distFiles.filter((path) =>
-  /^posts\/.+\/index\.html$/.test(path),
+  path.startsWith("posts/") && path.endsWith(".html"),
 );
 const generatedCategoryPages = distFiles.filter((path) =>
   /^categories\/.+\/index\.html$/.test(path),
 );
 
+const legacyPages = localPublishedEntries.flatMap(({ path, data }) =>
+  (data.legacyURLs ?? []).map((legacyURL) => ({
+    source: path,
+    file: routePathToHtmlFile(legacyURL),
+    target: `/posts/${path.replace(/\.(?:md|mdx)$/, "")}/`,
+  })),
+);
+const expectedLegacyFiles = legacyPages.map(({ file }) => file);
+const expectedLegacyFileSet = new Set(expectedLegacyFiles);
+const generatedLegacyPages = distFiles.filter((path) =>
+  expectedLegacyFileSet.has(path),
+);
+const generatedCanonicalPostPages = generatedPostPages.filter(
+  (path) => !expectedLegacyFileSet.has(path),
+);
+const expectedCanonicalPostPages = localPublishedEntries.map(
+  ({ path }) => `posts/${path.replace(/\.(?:md|mdx)$/, "")}/index.html`,
+);
+
+assertExactPathSet(
+  generatedCanonicalPostPages,
+  expectedCanonicalPostPages,
+  "canonical post pages",
+);
+assertExactPathSet(
+  generatedLegacyPages,
+  expectedLegacyFiles,
+  "legacy redirect pages",
+);
+for (const { file, source, target } of legacyPages) {
+  assertLegacyRedirectHtml(await readDist(file), target, `${file} (${source})`);
+}
+
 if (publishedEntries.length === 0) {
-  assert.deepEqual(generatedPostPages, []);
   assert.deepEqual(generatedCategoryPages, []);
   assert.equal(distFiles.some((path) => path.startsWith("posts/")), false);
   assert.equal(distFiles.some((path) => path.startsWith("categories/")), false);
 } else {
-  assert.ok(generatedPostPages.length >= localPublishedEntries.length);
   assert.equal(generatedCategoryPages.length, expectedCategories.size);
 }
 

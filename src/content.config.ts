@@ -3,6 +3,7 @@ import { glob } from "astro/loaders";
 import { z } from "astro/zod";
 
 import {
+  isCategoryLabel,
   isHttpUrl,
   isLegacyPath,
   isUpdatedDateOnOrAfterPubDate,
@@ -19,7 +20,13 @@ const blog = defineCollection({
       description: z.string().min(1),
       pubDate: z.coerce.date(),
       updatedDate: z.coerce.date().optional(),
-      categories: z.array(z.string()).default([]),
+      categories: z
+        .array(
+          z.string().refine(isCategoryLabel, {
+            error: "categories entries must be safe path segments",
+          }),
+        )
+        .default([]),
       draft: z.boolean().default(false),
       canonicalURL: z
         .string()

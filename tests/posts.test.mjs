@@ -5,10 +5,98 @@ import * as postsModule from "../src/lib/posts.mjs";
 
 const {
   adjacentPosts,
+  categoryPath,
   hasMeaningfulUpdate,
+  legacyRedirectPaths,
   paginatePosts,
   publishedPosts,
 } = postsModule;
+
+test("legacy redirects are generated only for published local posts", () => {
+  const posts = [
+    {
+      id: "local",
+      data: {
+        title: "Local post",
+        draft: false,
+        pubDate: new Date("2025-01-03"),
+        legacyURLs: ["/old/local/", "/%E6%97%A7%E6%96%87/"],
+      },
+    },
+    {
+      id: "external",
+      data: {
+        title: "External post",
+        draft: false,
+        pubDate: new Date("2025-01-02"),
+        canonicalURL: "https://example.com/external",
+        legacyURLs: ["/old/external/"],
+      },
+    },
+    {
+      id: "draft",
+      data: {
+        title: "Draft post",
+        draft: true,
+        pubDate: new Date("2025-01-01"),
+        legacyURLs: ["/old/draft/"],
+      },
+    },
+  ];
+
+  assert.deepEqual(legacyRedirectPaths(posts), [
+    {
+      params: { legacy: "old/local" },
+      props: {
+        title: "Local post",
+        target: "/posts/local/",
+      },
+    },
+    {
+      params: { legacy: "旧文" },
+      props: {
+        title: "Local post",
+        target: "/posts/local/",
+      },
+    },
+  ]);
+});
+
+test("legacy redirects reject duplicate and canonical route collisions", () => {
+  const post = (id, legacyURLs) => ({
+    id,
+    data: {
+      title: id,
+      draft: false,
+      pubDate: new Date("2025-01-01"),
+      legacyURLs,
+    },
+  });
+
+  assert.throws(
+    () => legacyRedirectPaths([post("one", ["/old/path", "/old/path/"])]),
+    { message: 'Legacy URL collision: "/old/path/"' },
+  );
+  assert.throws(
+    () =>
+      legacyRedirectPaths([
+        post("one", ["/posts/two/"]),
+        post("two", []),
+      ]),
+    { message: 'Legacy URL collision: "/posts/two/"' },
+  );
+  assert.throws(() => legacyRedirectPaths([post("one", ["/about/"])]), {
+    message: 'Legacy URL collision: "/about/"',
+  });
+});
+
+test("categoryPath encodes a validated category into one route segment", () => {
+  assert.equal(categoryPath("云原生"), "/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/");
+  assert.throws(() => categoryPath("Kubernetes/调度"), {
+    name: "TypeError",
+    message: "category must be a safe path segment",
+  });
+});
 
 const syntheticPosts = (count) =>
   Array.from({ length: count }, (_, index) => ({

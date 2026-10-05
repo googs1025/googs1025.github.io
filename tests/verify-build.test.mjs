@@ -1,7 +1,64 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { assertHtmlFilesOmitTerms } from "../scripts/verify-build-lib.mjs";
+import {
+  assertExactPathSet,
+  assertHtmlFilesOmitTerms,
+  assertLegacyRedirectHtml,
+  routePathToHtmlFile,
+} from "../scripts/verify-build-lib.mjs";
+
+test("path set verification rejects missing and unexpected generated pages", () => {
+  assert.doesNotThrow(() =>
+    assertExactPathSet(
+      ["posts/one/index.html", "posts/two/index.html"],
+      ["posts/two/index.html", "posts/one/index.html"],
+      "canonical post pages",
+    ),
+  );
+  assert.throws(
+    () =>
+      assertExactPathSet(
+        ["posts/one/index.html", "posts/extra/index.html"],
+        ["posts/one/index.html", "posts/missing/index.html"],
+        "canonical post pages",
+      ),
+    {
+      message:
+        "canonical post pages mismatch; missing: posts/missing/index.html; unexpected: posts/extra/index.html",
+    },
+  );
+});
+
+test("legacy route paths map to static HTML files", () => {
+  assert.equal(routePathToHtmlFile("/old/post/"), "old/post/index.html");
+  assert.equal(
+    routePathToHtmlFile("/%E6%97%A7%E6%96%87/"),
+    "旧文/index.html",
+  );
+});
+
+test("legacy redirect HTML requires canonical, immediate refresh, and fallback link", () => {
+  const target = "/posts/current/";
+  const html = `
+    <link rel="canonical" href="https://googs1025.github.io/posts/current/">
+    <meta http-equiv="refresh" content="0;url=/posts/current/">
+    <p><a href="/posts/current/">前往文章的新地址</a></p>
+  `;
+
+  assert.doesNotThrow(() =>
+    assertLegacyRedirectHtml(html, target, "old/post/index.html"),
+  );
+  assert.throws(
+    () =>
+      assertLegacyRedirectHtml(
+        html.replace('content="0;url=/posts/current/"', 'content="5;url=/posts/current/"'),
+        target,
+        "old/post/index.html",
+      ),
+    { message: "legacy redirect old/post/index.html must refresh immediately to /posts/current/" },
+  );
+});
 
 test("generated HTML diagnostics name the exact file and forbidden term", async () => {
   const reads = [];

@@ -1,4 +1,74 @@
+import { isCategoryLabel, isLegacyPath } from "./content-validation.mjs";
+
 export const PAGE_SIZE = 10;
+
+export function categoryPath(category) {
+  if (!isCategoryLabel(category)) {
+    throw new TypeError("category must be a safe path segment");
+  }
+
+  return `/categories/${encodeURIComponent(category)}/`;
+}
+
+function normalizedRoutePath(path) {
+  let normalized = path;
+
+  for (let pass = 0; pass < 4; pass += 1) {
+    const decoded = decodeURIComponent(normalized);
+    if (decoded === normalized) break;
+    normalized = decoded;
+  }
+
+  return normalized === "/" ? normalized : normalized.replace(/\/+$/, "");
+}
+
+export function legacyRedirectPaths(posts) {
+  const published = publishedPosts(posts);
+  const localPosts = published.filter(({ data }) => !data.canonicalURL);
+  const occupied = new Set(
+    [
+      "/",
+      "/about/",
+      "/blog/",
+      "/cv/",
+      "/404.html",
+      "/favicon.svg",
+      "/rss.xml",
+      ...archiveDynamicPages(published).map(
+        ({ currentPage }) => `/blog/${currentPage}/`,
+      ),
+      ...published.flatMap(({ data }) =>
+        (data.categories ?? []).map(categoryPath),
+      ),
+      ...localPosts.map(({ id }) => `/posts/${id}/`),
+    ].map(normalizedRoutePath),
+  );
+  const routes = [];
+
+  for (const post of localPosts) {
+    for (const legacyURL of post.data.legacyURLs ?? []) {
+      if (!isLegacyPath(legacyURL)) {
+        throw new TypeError(`Invalid legacy URL: "${legacyURL}"`);
+      }
+
+      const normalized = normalizedRoutePath(legacyURL);
+      if (occupied.has(normalized)) {
+        throw new Error(`Legacy URL collision: "${legacyURL}"`);
+      }
+      occupied.add(normalized);
+
+      routes.push({
+        params: { legacy: normalized.slice(1) },
+        props: {
+          title: post.data.title,
+          target: `/posts/${post.id}/`,
+        },
+      });
+    }
+  }
+
+  return routes;
+}
 
 export function publishedPosts(posts) {
   return posts
@@ -102,7 +172,7 @@ export function postListItem(post) {
   const isExternal = Boolean(post.data.canonicalURL);
   const categories = post.data.categories.map((category) => ({
     name: category,
-    url: `/categories/${encodeURIComponent(category)}/`,
+    url: categoryPath(category),
   }));
 
   return {

@@ -1,0 +1,31 @@
+---
+import { getCollection, type CollectionEntry } from "astro:content";
+
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { legacyRedirectPaths } from "@/lib/posts.mjs";
+
+interface Props {
+  title: string;
+  target: string;
+}
+
+export async function getStaticPaths() {
+  const posts: CollectionEntry<"blog">[] = await getCollection("blog");
+  return legacyRedirectPaths(posts);
+}
+
+const { title, target } = Astro.props;
+---
+
+<BaseLayout
+  title={`${title}（已迁移）`}
+  description={`此文章已迁移到 ${target}`}
+  canonical={target}
+  noindex
+>
+  <meta slot="head" http-equiv="refresh" content={`0;url=${target}`} />
+  <section class="content" data-pagefind-ignore>
+    <h1>文章已迁移</h1>
+    <p>页面将立即跳转。若没有自动跳转，请<a href={target}>前往文章的新地址</a>。</p>
+  </section>
+</BaseLayout>

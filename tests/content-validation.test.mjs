@@ -2,10 +2,31 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  isCategoryLabel,
   isHttpUrl,
   isLegacyPath,
   isUpdatedDateOnOrAfterPubDate,
 } from "../src/lib/content-validation.mjs";
+
+test("category labels are non-empty safe path segments", () => {
+  for (const value of ["云原生", "Open Source", "C++"]) {
+    assert.equal(isCategoryLabel(value), true, value);
+  }
+
+  for (const value of [
+    "",
+    " 云原生",
+    "云原生 ",
+    ".",
+    "..",
+    "Kubernetes/调度",
+    String.raw`Kubernetes\调度`,
+    "topic?draft",
+    "topic#section",
+  ]) {
+    assert.equal(isCategoryLabel(value), false, JSON.stringify(value));
+  }
+});
 
 test("isHttpUrl accepts absolute HTTP and HTTPS URLs", () => {
   for (const value of [
