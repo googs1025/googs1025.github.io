@@ -17,12 +17,13 @@ const {
 test("post route helpers NFC-normalize Astro entry IDs", () => {
   assert.equal(postRouteId("e\u0301"), "é");
   assert.equal(postPath("e\u0301"), "/posts/é/");
+  assert.equal(postRouteId("nested/e\u0301"), "nested/é");
+  assert.equal(postPath("nested/e\u0301"), "/posts/nested/é/");
 });
 
 test("post route helpers reject unsafe route semantics", () => {
   for (const id of [
     "",
-    "custom/route",
     String.raw`custom\route`,
     "custom?draft",
     "custom#section",
@@ -32,7 +33,13 @@ test("post route helpers reject unsafe route semantics", () => {
   ]) {
     assert.throws(() => postRouteId(id), {
       name: "TypeError",
-      message: "post id must be a safe route segment",
+      message: "post id must be a safe route path",
+    });
+  }
+  for (const id of ["/route", "route/", "nested//route", "nested/../route"]) {
+    assert.throws(() => postRouteId(id), {
+      name: "TypeError",
+      message: "post id must be a safe route path",
     });
   }
 });

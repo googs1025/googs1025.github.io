@@ -2,7 +2,7 @@ import {
   decodeLegacyPathname,
   isCategoryLabel,
   isLegacyPath,
-  isPostRouteSegment,
+  isPostRoutePath,
   normalizeRawPathname,
 } from "./content-validation.mjs";
 
@@ -10,12 +10,12 @@ export const PAGE_SIZE = 10;
 
 export function postRouteId(id) {
   if (typeof id !== "string") {
-    throw new TypeError("post id must be a safe route segment");
+    throw new TypeError("post id must be a safe route path");
   }
 
   const normalized = normalizeRawPathname(id);
-  if (!isPostRouteSegment(normalized)) {
-    throw new TypeError("post id must be a safe route segment");
+  if (!isPostRoutePath(normalized)) {
+    throw new TypeError("post id must be a safe route path");
   }
 
   return normalized;

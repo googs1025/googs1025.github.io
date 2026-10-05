@@ -45,6 +45,14 @@ export function isPostRouteSegment(value) {
   );
 }
 
+export function isPostRoutePath(value) {
+  return (
+    typeof value === "string" &&
+    value.length > 0 &&
+    value.split("/").every(isPostRouteSegment)
+  );
+}
+
 function isSafeLegacyPathForm(value) {
   return (
     value.startsWith("/") &&

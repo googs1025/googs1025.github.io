@@ -30,9 +30,7 @@ test("raw percent filesystem paths are listed without URL decoding", async () =>
 test("expected post IDs use Astro glob loader slug normalization", () => {
   assert.equal(contentPathToPostId("100%-post.md"), "100-post");
   assert.equal(contentPathToPostId("Hello World.mdx"), "hello-world");
-  assert.throws(() => contentPathToPostId("nested/hello.md"), {
-    message: "post id must be a safe route segment",
-  });
+  assert.equal(contentPathToPostId("nested/Hello World.mdx"), "nested/hello-world");
   assert.equal(contentPathToPostId("ignored.md", "custom-route"), "custom-route");
   assert.equal(contentPathToPostId("e\u0301.md"), "é");
   assert.equal(contentPathToPostId("ignored.md", "e\u0301"), "é");

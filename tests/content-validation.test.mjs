@@ -6,8 +6,28 @@ import {
   isHttpUrl,
   isLegacyPath,
   isPostRouteSegment,
+  isPostRoutePath,
   isUpdatedDateOnOrAfterPubDate,
 } from "../src/lib/content-validation.mjs";
+
+test("post route paths accept one or more individually safe segments", () => {
+  for (const value of ["example", "nested/example", "指南/é"]) {
+    assert.equal(isPostRoutePath(value), true, value);
+  }
+
+  for (const value of [
+    "",
+    "/example",
+    "example/",
+    "nested//example",
+    "nested/./example",
+    "nested/../example",
+    "nested/custom?draft",
+    "nested/e\u0301",
+  ]) {
+    assert.equal(isPostRoutePath(value), false, JSON.stringify(value));
+  }
+});
 
 test("post route segments accept only safe NFC path segments", () => {
   for (const value of ["custom-route", "é", "100-post"]) {
