@@ -9,7 +9,7 @@ import {
 } from "../src/lib/content-validation.mjs";
 
 test("category labels are non-empty safe path segments", () => {
-  for (const value of ["云原生", "Open Source", "C++"]) {
+  for (const value of ["云原生", "Open Source", "C++", "é"]) {
     assert.equal(isCategoryLabel(value), true, value);
   }
 
@@ -24,6 +24,7 @@ test("category labels are non-empty safe path segments", () => {
     "topic?draft",
     "topic#section",
     "100% Kubernetes",
+    "e\u0301",
   ]) {
     assert.equal(isCategoryLabel(value), false, JSON.stringify(value));
   }

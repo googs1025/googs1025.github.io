@@ -1,4 +1,8 @@
-import { isCategoryLabel, isLegacyPath } from "./content-validation.mjs";
+import {
+  isCategoryLabel,
+  isLegacyPath,
+  normalizePathname,
+} from "./content-validation.mjs";
 
 export const PAGE_SIZE = 10;
 
@@ -11,13 +15,7 @@ export function categoryPath(category) {
 }
 
 function normalizedRoutePath(path) {
-  let normalized = path;
-
-  for (let pass = 0; pass < 4; pass += 1) {
-    const decoded = decodeURIComponent(normalized);
-    if (decoded === normalized) break;
-    normalized = decoded;
-  }
+  const normalized = normalizePathname(path);
 
   return normalized === "/" ? normalized : normalized.replace(/\/+$/, "");
 }

@@ -20,7 +20,11 @@ test("legacy redirects are generated only for published local posts", () => {
         title: "Local post",
         draft: false,
         pubDate: new Date("2025-01-03"),
-        legacyURLs: ["/old/local/", "/%E6%97%A7%E6%96%87/"],
+        legacyURLs: [
+          "/old/local/",
+          "/%E6%97%A7%E6%96%87/",
+          "/archive/e\u0301/",
+        ],
       },
     },
     {
@@ -59,6 +63,13 @@ test("legacy redirects are generated only for published local posts", () => {
         target: "/posts/local/",
       },
     },
+    {
+      params: { legacy: "archive/é" },
+      props: {
+        title: "Local post",
+        target: "/posts/local/",
+      },
+    },
   ]);
 });
 
@@ -76,6 +87,13 @@ test("legacy redirects reject duplicate, generated, and public path collisions",
   assert.throws(
     () => legacyRedirectPaths([post("one", ["/old/path", "/old/path/"])]),
     { message: 'Legacy URL collision: "/old/path/"' },
+  );
+  assert.throws(
+    () =>
+      legacyRedirectPaths([
+        post("one", ["/archive/é/", "/archive/e\u0301/"]),
+      ]),
+    { message: 'Legacy URL collision: "/archive/é/"' },
   );
   assert.throws(
     () =>
@@ -120,6 +138,10 @@ test("categoryPath encodes a validated category into one route segment", () => {
     message: "category must be a safe path segment",
   });
   assert.throws(() => categoryPath("100% Kubernetes"), {
+    name: "TypeError",
+    message: "category must be a safe path segment",
+  });
+  assert.throws(() => categoryPath("e\u0301"), {
     name: "TypeError",
     message: "category must be a safe path segment",
   });

@@ -6,8 +6,33 @@ import {
   assertHtmlFilesOmitTerms,
   assertLegacyRedirectHtml,
   findLegacyRedirectPages,
+  expectedCategoryHtmlFiles,
   routePathToHtmlFile,
 } from "../scripts/verify-build-lib.mjs";
+
+test("category page verification compares exact normalized paths, not counts", () => {
+  const expected = expectedCategoryHtmlFiles(["云原生", "é"]);
+
+  assert.deepEqual(expected, [
+    "categories/云原生/index.html",
+    "categories/é/index.html",
+  ]);
+  assert.doesNotThrow(() =>
+    assertExactPathSet([], expectedCategoryHtmlFiles([]), "category pages"),
+  );
+  assert.throws(
+    () =>
+      assertExactPathSet(
+        ["categories/云原生/index.html", "categories/other/index.html"],
+        expected,
+        "category pages",
+      ),
+    {
+      message:
+        "category pages mismatch; missing: categories/é/index.html; unexpected: categories/other/index.html",
+    },
+  );
+});
 
 test("legacy page discovery exposes unexpected redirect-shaped output", async () => {
   const htmlByPath = new Map([
@@ -72,6 +97,7 @@ test("legacy route paths map to static HTML files", () => {
     routePathToHtmlFile("/%E6%97%A7%E6%96%87/"),
     "旧文/index.html",
   );
+  assert.equal(routePathToHtmlFile("/archive/e\u0301/"), "archive/é/index.html");
 });
 
 test("legacy redirect HTML requires canonical, immediate refresh, and fallback link", () => {

@@ -1,3 +1,6 @@
+import { normalizePathname } from "../src/lib/content-validation.mjs";
+import { categoryPath } from "../src/lib/posts.mjs";
+
 export async function assertHtmlFilesOmitTerms(paths, forbiddenTerms, readHtml) {
   for (const path of paths) {
     const html = await readHtml(path);
@@ -25,15 +28,14 @@ export function assertExactPathSet(actualPaths, expectedPaths, label) {
 }
 
 export function routePathToHtmlFile(routePath) {
-  let decoded = routePath;
-  for (let pass = 0; pass < 4; pass += 1) {
-    const next = decodeURIComponent(decoded);
-    if (next === decoded) break;
-    decoded = next;
-  }
-
-  const route = decoded.replace(/^\/+|\/+$/g, "");
+  const route = normalizePathname(routePath).replace(/^\/+|\/+$/g, "");
   return route ? `${route}/index.html` : "index.html";
+}
+
+export function expectedCategoryHtmlFiles(categories) {
+  return [...categories].map((category) =>
+    routePathToHtmlFile(categoryPath(category)),
+  );
 }
 
 const LEGACY_REDIRECT_META =

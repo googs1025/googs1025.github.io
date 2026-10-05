@@ -8,6 +8,7 @@ import {
   assertExactPathSet,
   assertHtmlFilesOmitTerms,
   assertLegacyRedirectHtml,
+  expectedCategoryHtmlFiles,
   findLegacyRedirectPages,
   routePathToHtmlFile,
 } from "./verify-build-lib.mjs";
@@ -168,9 +169,10 @@ for (const html of [home, blog]) {
 const generatedPostPages = distFiles.filter((path) =>
   path.startsWith("posts/") && path.endsWith(".html"),
 );
-const generatedCategoryPages = distFiles.filter((path) =>
-  /^categories\/.+\/index\.html$/.test(path),
-);
+const generatedCategoryPages = distFiles
+  .filter((path) => /^categories\/.+\/index\.html$/.test(path))
+  .map((path) => path.normalize("NFC"));
+const expectedCategoryPages = expectedCategoryHtmlFiles(expectedCategories);
 
 const legacyPages = localPublishedEntries.flatMap(({ path, data }) =>
   (data.legacyURLs ?? []).map((legacyURL) => ({
@@ -202,6 +204,11 @@ assertExactPathSet(
   expectedLegacyFiles,
   "legacy redirect pages",
 );
+assertExactPathSet(
+  generatedCategoryPages,
+  expectedCategoryPages,
+  "category pages",
+);
 for (const { file, source, target } of legacyPages) {
   assertLegacyRedirectHtml(await readDist(file), target, `${file} (${source})`);
 }
@@ -210,8 +217,6 @@ if (publishedEntries.length === 0) {
   assert.deepEqual(generatedCategoryPages, []);
   assert.equal(distFiles.some((path) => path.startsWith("posts/")), false);
   assert.equal(distFiles.some((path) => path.startsWith("categories/")), false);
-} else {
-  assert.equal(generatedCategoryPages.length, expectedCategories.size);
 }
 
 for (const html of [about, cv]) {

@@ -4,11 +4,24 @@ const HTTP_URL = /^https?:\/\//i;
 const LEGACY_PATH_FORBIDDEN_CHARACTERS = /[?#\\\u0000-\u001f\u007f]/;
 const MAX_LEGACY_PATH_DECODINGS = 4;
 
+export function normalizePathname(value) {
+  let normalized = value;
+
+  for (let pass = 0; pass < MAX_LEGACY_PATH_DECODINGS; pass += 1) {
+    const decoded = decodeURIComponent(normalized);
+    if (decoded === normalized) break;
+    normalized = decoded;
+  }
+
+  return normalized.normalize("NFC");
+}
+
 export function isCategoryLabel(value) {
   return (
     typeof value === "string" &&
     value.length > 0 &&
     value === value.trim() &&
+    value === value.normalize("NFC") &&
     value !== "." &&
     value !== ".." &&
     !CATEGORY_PATH_FORBIDDEN_CHARACTERS.test(value)
