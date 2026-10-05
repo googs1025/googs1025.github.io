@@ -23,8 +23,16 @@ export async function assertHtmlFilesOmitTerms(paths, forbiddenTerms, readHtml) 
 }
 
 export function assertExactPathSet(actualPaths, expectedPaths, label) {
+  const seenExpected = new Set();
+  for (const path of expectedPaths) {
+    if (seenExpected.has(path)) {
+      throw new Error(`${label} contains duplicate expected path: ${path}`);
+    }
+    seenExpected.add(path);
+  }
+
   const actual = new Set(actualPaths);
-  const expected = new Set(expectedPaths);
+  const expected = seenExpected;
   const missing = [...expected].filter((path) => !actual.has(path)).sort();
   const unexpected = [...actual].filter((path) => !expected.has(path)).sort();
 

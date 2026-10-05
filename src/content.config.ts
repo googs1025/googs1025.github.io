@@ -6,6 +6,7 @@ import {
   isCategoryLabel,
   isHttpUrl,
   isLegacyPath,
+  isPostRouteSegment,
   isUpdatedDateOnOrAfterPubDate,
 } from "./lib/content-validation.mjs";
 
@@ -18,7 +19,12 @@ const blog = defineCollection({
     .object({
       title: z.string().min(1),
       description: z.string().min(1),
-      slug: z.string().min(1).optional(),
+      slug: z
+        .string()
+        .refine(isPostRouteSegment, {
+          error: "slug must be a safe NFC route segment",
+        })
+        .optional(),
       pubDate: z.coerce.date(),
       updatedDate: z.coerce.date().optional(),
       categories: z

@@ -5,8 +5,32 @@ import {
   isCategoryLabel,
   isHttpUrl,
   isLegacyPath,
+  isPostRouteSegment,
   isUpdatedDateOnOrAfterPubDate,
 } from "../src/lib/content-validation.mjs";
+
+test("post route segments accept only safe NFC path segments", () => {
+  for (const value of ["custom-route", "é", "100-post"]) {
+    assert.equal(isPostRouteSegment(value), true, value);
+  }
+
+  for (const value of [
+    "",
+    " custom-route",
+    "custom-route ",
+    ".",
+    "..",
+    "custom/route",
+    String.raw`custom\route`,
+    "custom?draft",
+    "custom#section",
+    "100%post",
+    "e\u0301",
+    "custom\nroute",
+  ]) {
+    assert.equal(isPostRouteSegment(value), false, JSON.stringify(value));
+  }
+});
 
 test("category labels are non-empty safe path segments", () => {
   for (const value of ["云原生", "Open Source", "C++", "é"]) {

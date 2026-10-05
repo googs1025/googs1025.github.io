@@ -15,8 +15,26 @@ const {
 } = postsModule;
 
 test("post route helpers NFC-normalize Astro entry IDs", () => {
-  assert.equal(postRouteId("archive/e\u0301"), "archive/é");
-  assert.equal(postPath("archive/e\u0301"), "/posts/archive/é/");
+  assert.equal(postRouteId("e\u0301"), "é");
+  assert.equal(postPath("e\u0301"), "/posts/é/");
+});
+
+test("post route helpers reject unsafe route semantics", () => {
+  for (const id of [
+    "",
+    "custom/route",
+    String.raw`custom\route`,
+    "custom?draft",
+    "custom#section",
+    "100%post",
+    ".",
+    "..",
+  ]) {
+    assert.throws(() => postRouteId(id), {
+      name: "TypeError",
+      message: "post id must be a safe route segment",
+    });
+  }
 });
 
 test("legacy redirects are generated only for published local posts", () => {
@@ -80,10 +98,10 @@ test("legacy redirects are generated only for published local posts", () => {
   ]);
 });
 
-test("legacy route checks preserve percent characters in raw post IDs and public files", () => {
+test("legacy route checks preserve percent characters in raw public files", () => {
   const posts = [
     {
-      id: "100%-post",
+      id: "percent-post",
       data: {
         title: "Percent post",
         draft: false,
@@ -100,7 +118,7 @@ test("legacy route checks preserve percent characters in raw post IDs and public
         params: { legacy: "old/percent-post" },
         props: {
           title: "Percent post",
-          target: "/posts/100%-post/",
+          target: "/posts/percent-post/",
         },
       },
     ],
@@ -122,6 +140,23 @@ test("legacy redirect targets and collisions use NFC post IDs", () => {
   assert.throws(
     () => legacyRedirectPaths([{ ...post, data: { ...post.data, legacyURLs: ["/posts/é/"] } }]),
     { message: 'Legacy URL collision: "/posts/é/"' },
+  );
+});
+
+test("legacy generation rejects NFC-equivalent local post routes", () => {
+  const makePost = (id) => ({
+    id,
+    data: {
+      title: id,
+      draft: false,
+      pubDate: new Date("2025-01-01"),
+      legacyURLs: [],
+    },
+  });
+
+  assert.throws(
+    () => legacyRedirectPaths([makePost("é"), makePost("e\u0301")]),
+    { message: 'Duplicate local post route: "/posts/é/"' },
   );
 });
 

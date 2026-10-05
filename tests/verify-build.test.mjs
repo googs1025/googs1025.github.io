@@ -29,7 +29,10 @@ test("raw percent filesystem paths are listed without URL decoding", async () =>
 
 test("expected post IDs use Astro glob loader slug normalization", () => {
   assert.equal(contentPathToPostId("100%-post.md"), "100-post");
-  assert.equal(contentPathToPostId("nested/Hello World.mdx"), "nested/hello-world");
+  assert.equal(contentPathToPostId("Hello World.mdx"), "hello-world");
+  assert.throws(() => contentPathToPostId("nested/hello.md"), {
+    message: "post id must be a safe route segment",
+  });
   assert.equal(contentPathToPostId("ignored.md", "custom-route"), "custom-route");
   assert.equal(contentPathToPostId("e\u0301.md"), "é");
   assert.equal(contentPathToPostId("ignored.md", "e\u0301"), "é");
@@ -112,6 +115,21 @@ test("path set verification rejects missing and unexpected generated pages", () 
     {
       message:
         "canonical post pages mismatch; missing: posts/missing/index.html; unexpected: posts/extra/index.html",
+    },
+  );
+});
+
+test("path set verification rejects duplicate expected canonical pages", () => {
+  assert.throws(
+    () =>
+      assertExactPathSet(
+        ["posts/é/index.html"],
+        ["posts/é/index.html", "posts/é/index.html"],
+        "canonical post pages",
+      ),
+    {
+      message:
+        "canonical post pages contains duplicate expected path: posts/é/index.html",
     },
   );
 });

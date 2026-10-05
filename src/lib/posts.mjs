@@ -2,17 +2,23 @@ import {
   decodeLegacyPathname,
   isCategoryLabel,
   isLegacyPath,
+  isPostRouteSegment,
   normalizeRawPathname,
 } from "./content-validation.mjs";
 
 export const PAGE_SIZE = 10;
 
 export function postRouteId(id) {
-  if (typeof id !== "string" || id.length === 0) {
-    throw new TypeError("post id must be a non-empty string");
+  if (typeof id !== "string") {
+    throw new TypeError("post id must be a safe route segment");
   }
 
-  return normalizeRawPathname(id);
+  const normalized = normalizeRawPathname(id);
+  if (!isPostRouteSegment(normalized)) {
+    throw new TypeError("post id must be a safe route segment");
+  }
+
+  return normalized;
 }
 
 export function postPath(id) {
@@ -45,7 +51,7 @@ function normalizedLegacyRoutePath(path) {
  */
 export function legacyRedirectPaths(posts, { publicFiles = [] } = {}) {
   const published = publishedPosts(posts);
-  const localPosts = published.filter(({ data }) => !data.canonicalURL);
+  const localPosts = localPublishedPosts(published);
   const occupied = new Set(
     [
       "/",
@@ -99,6 +105,23 @@ export function legacyRedirectPaths(posts, { publicFiles = [] } = {}) {
   }
 
   return routes;
+}
+
+export function localPublishedPosts(posts) {
+  const localPosts = publishedPosts(posts).filter(
+    ({ data }) => !data.canonicalURL,
+  );
+  const routes = new Set();
+
+  for (const post of localPosts) {
+    const route = postPath(post.id);
+    if (routes.has(route)) {
+      throw new Error(`Duplicate local post route: "${route}"`);
+    }
+    routes.add(route);
+  }
+
+  return localPosts;
 }
 
 export function publishedPosts(posts) {

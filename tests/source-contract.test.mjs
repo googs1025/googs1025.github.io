@@ -415,8 +415,7 @@ test("post routes render local published entries with deterministic adjacent pos
   const page = await read("src/pages/posts/[...slug].astro");
 
   assert.match(page, /getCollection\(["']blog["']\)/);
-  assert.match(page, /publishedPosts\(/);
-  assert.match(page, /!post\.data\.canonicalURL/);
+  assert.match(page, /localPublishedPosts\(/);
   assert.match(page, /adjacentPosts\(/);
   assert.match(page, /params:\s*\{\s*slug:\s*postRouteId\(post\.id\)\s*\}/);
   assert.match(page, /await\s+render\(post\)/);

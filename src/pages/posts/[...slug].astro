@@ -6,7 +6,7 @@ import {
 } from "astro:content";
 
 import PostLayout from "@/layouts/PostLayout.astro";
-import { adjacentPosts, postRouteId, publishedPosts } from "@/lib/posts.mjs";
+import { adjacentPosts, localPublishedPosts, postRouteId } from "@/lib/posts.mjs";
 
 interface Props {
   post: CollectionEntry<"blog">;
@@ -15,10 +15,8 @@ interface Props {
 }
 
 export async function getStaticPaths() {
-  const published: CollectionEntry<"blog">[] = publishedPosts(
-    await getCollection("blog"),
-  );
-  const localPosts = published.filter((post) => !post.data.canonicalURL);
+  const posts: CollectionEntry<"blog">[] = await getCollection("blog");
+  const localPosts: CollectionEntry<"blog">[] = localPublishedPosts(posts);
 
   return localPosts.map((post, index) => ({
     params: { slug: postRouteId(post.id) },

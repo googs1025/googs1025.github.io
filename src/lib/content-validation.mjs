@@ -4,6 +4,7 @@ const HTTP_URL = /^https?:\/\//i;
 const LEGACY_PATH_FORBIDDEN_CHARACTERS = /[?#\\\u0000-\u001f\u007f]/;
 const ENCODED_PATH_SEPARATOR = /%(?:2f|5c)/i;
 const MAX_LEGACY_PATH_DECODINGS = 4;
+const POST_ROUTE_FORBIDDEN_CHARACTERS = /[/?#%\\\s\u0000-\u001f\u007f]/;
 
 export function normalizeRawPathname(value) {
   return value.normalize("NFC");
@@ -30,6 +31,17 @@ export function isCategoryLabel(value) {
     value !== "." &&
     value !== ".." &&
     !CATEGORY_PATH_FORBIDDEN_CHARACTERS.test(value)
+  );
+}
+
+export function isPostRouteSegment(value) {
+  return (
+    typeof value === "string" &&
+    value.length > 0 &&
+    value === value.normalize("NFC") &&
+    value !== "." &&
+    value !== ".." &&
+    !POST_ROUTE_FORBIDDEN_CHARACTERS.test(value)
   );
 }
 
