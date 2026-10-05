@@ -8,10 +8,10 @@ const emailHref = `mailto:${SITE.email}`;
 
 <BaseLayout
   title="About"
-  description={`${PROFILE.identity.name}（${PROFILE.identity.latinName}）的个人简介、工作方向与开源社区参与。`}
+  description={`${PROFILE.identity.name}（${PROFILE.identity.latinName}）的开源方向、社区角色与 MUSA 生态实践。`}
 >
   <article class="content profile-page" data-pagefind-body>
-    <header class="profile-intro">
+    <section class="profile-intro" aria-labelledby="about-me">
       <img
         class="profile-image"
         src="/images/profile.jpg"
@@ -21,52 +21,49 @@ const emailHref = `mailto:${SITE.email}`;
       />
       <div>
         <p class="profile-label">About</p>
-        <h1>{PROFILE.identity.name}</h1>
+        <h1 id="about-me">1. About Me</h1>
         <p class="profile-handle">
           {PROFILE.identity.latinName} · {PROFILE.identity.handle}
         </p>
-        <p class="profile-summary">{PROFILE.identity.summary}</p>
+        <blockquote>
+          <p>{PROFILE.identity.summary}</p>
+          {PROFILE.experience.map((item) => <p>{item.summary}</p>)}
+          <p>{PROFILE.identity.motto}</p>
+        </blockquote>
       </div>
-    </header>
-
-    <section class="profile-section" aria-labelledby="about-work">
-      <h2 id="about-work">工作</h2>
-      <ul class="fact-list">
-        {PROFILE.experience.map((item) => <li>{item.summary}</li>)}
-      </ul>
     </section>
 
     <section class="profile-section" aria-labelledby="about-focus">
-      <h2 id="about-focus">技术方向</h2>
-      <ul class="fact-list">
-        {PROFILE.technicalFocus.map((focus) => <li>{focus}</li>)}
-      </ul>
-    </section>
-
-    <section class="profile-section" aria-labelledby="about-open-source">
-      <h2 id="about-open-source">开源角色与社区</h2>
-      <ul class="role-list">
-        {PROFILE.openSourceRoles.map((item) => (
-          <li>
-            <a href={item.url}>{item.project}</a>{" "}{item.role}
-          </li>
-        ))}
-        {PROFILE.recognitions.map((item) => (
-          <li><a href={item.url}>{item.title}</a></li>
-        ))}
-        {PROFILE.collaborations.map((item) => (
-          <li><a href={item.url}>{item.project}</a>：{item.activity}</li>
-        ))}
-      </ul>
-    </section>
-
-    <section class="profile-section" aria-labelledby="about-open-source-focus">
-      <h2 id="about-open-source-focus">开源方向</h2>
+      <h2 id="about-focus">2. Open Source Focus</h2>
       {PROFILE.openSourceFocus.map((focus) => (
         <div class="cv-entry">
           <h3>{focus.topic}</h3>
+          <p>{focus.description}</p>
+        </div>
+      ))}
+    </section>
+
+    <section class="profile-section" aria-labelledby="about-open-source">
+      <h2 id="about-open-source">3. Open Source Roles &amp; Recognition</h2>
+      {PROFILE.openSourceRoles.map((item) => (
+        <div class="cv-entry">
+          <h3><a href={item.url}>{item.project}</a>{" "}{item.role}</h3>
+          <p>{item.description}</p>
+        </div>
+      ))}
+      {PROFILE.recognitions.map((item) => (
+        <div class="cv-entry">
+          <h3>{item.title}</h3>
+          <p>{item.description}</p>
+          <p><a href={item.url}>Official recognition</a></p>
+        </div>
+      ))}
+      {PROFILE.roleGroups.map((group) => (
+        <div class="cv-entry">
+          <h3>{group.title}</h3>
+          <p>{group.description}</p>
           <ul class="role-list">
-            {focus.projects.map((project) => (
+            {group.projects.map((project) => (
               <li><a href={project.url}>{project.project}</a></li>
             ))}
           </ul>
@@ -75,35 +72,36 @@ const emailHref = `mailto:${SITE.email}`;
     </section>
 
     <section class="profile-section" aria-labelledby="about-musa">
-      <h2 id="about-musa">MUSA 生态项目</h2>
-      <ul class="role-list">
-        {PROFILE.musaProjects.map((project) => (
-          <li>
-            <a href={project.url}>{project.project}</a>：{project.description}
-          </li>
-        ))}
-      </ul>
+      <h2 id="about-musa">4. MUSA Ecosystem</h2>
+      {PROFILE.musaProjects.map((project) => (
+        <div class="cv-entry">
+          <h3><a href={project.url}>{project.project}</a></h3>
+          <p>{project.description}</p>
+        </div>
+      ))}
     </section>
 
     <section class="profile-section" aria-labelledby="about-exploring">
-      <h2 id="about-exploring">正在探索</h2>
+      <h2 id="about-exploring">5. Currently Exploring</h2>
       <ul class="fact-list">
         {PROFILE.exploring.map((topic) => <li>{topic}</li>)}
       </ul>
     </section>
 
-    <section class="profile-section" aria-labelledby="about-summary">
-      <h2 id="about-summary">中文简介</h2>
-      <p>{PROFILE.chineseSummary}</p>
+    <section class="profile-section" aria-labelledby="about-contact">
+      <h2 id="about-contact">6. Contact</h2>
+      <ul class="contact-list">
+        <li><a href={emailHref}>Email: {SITE.email}</a></li>
+        <li><a href={SITE.github}>GitHub: {SITE.handle.replace(/^@/, "")}</a></li>
+        <li>WeChat: googs1025</li>
+      </ul>
     </section>
 
-    <section class="profile-section" aria-labelledby="about-contact">
-      <h2 id="about-contact">联系</h2>
-      <ul class="contact-list">
-        <li><a href={SITE.github}>GitHub · {SITE.handle.replace(/^@/, "")}</a></li>
-        <li><a href={emailHref}>{SITE.email}</a></li>
-        <li>WeChat · googs1025</li>
-      </ul>
+    <section class="profile-section" aria-labelledby="about-chinese">
+      <h2 id="about-chinese">7. 中文简介</h2>
+      <blockquote>
+        {PROFILE.chineseSummary.map((paragraph) => <p>{paragraph}</p>)}
+      </blockquote>
     </section>
   </article>
 </BaseLayout>

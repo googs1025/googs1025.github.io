@@ -442,5 +442,5 @@ test("About marks its meaningful profile content for Pagefind", async () => {
     about,
     /<article\s+class=["']content profile-page["']\s+data-pagefind-body>/,
   );
-  assert.match(about, /PROFILE\.technicalFocus/);
+  assert.match(about, /PROFILE\.openSourceFocus/);
 });

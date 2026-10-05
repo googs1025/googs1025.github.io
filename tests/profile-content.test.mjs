@@ -8,7 +8,7 @@ import { PROFILE } from "../src/data/profile.mjs";
 const readSource = (path) =>
   readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
-test("About and CV render repeated profile facts from shared data", async () => {
+test("About and CV render profile facts from shared data", async () => {
   const [about, cv] = await Promise.all([
     readSource("src/pages/about.astro"),
     readSource("src/pages/cv.astro"),
@@ -19,16 +19,6 @@ test("About and CV render repeated profile facts from shared data", async () => 
     assert.match(page, /import \{ SITE \} from ["']@\/data\/site["']/);
     assert.match(page, /PROFILE\.identity/);
 
-    for (const collection of [
-      "experience",
-      "technicalFocus",
-      "openSourceRoles",
-      "collaborations",
-      "recognitions",
-    ]) {
-      assert.match(page, new RegExp(`PROFILE\\.${collection}\\.map\\(`));
-    }
-
     assert.match(page, /SITE\.github/);
     assert.match(page, /SITE\.email/);
     assert.doesNotMatch(
@@ -36,6 +26,34 @@ test("About and CV render repeated profile facts from shared data", async () => 
       /马上消费金融|ByteDance|Kubernetes 调度|GPU 资源管理|LLM 推理基础设施|github\.com\/kubernetes|github\.com\/vllm-project|github\.com\/volcano-sh|googs1025@gmail\.com/,
     );
   }
+
+  for (const collection of [
+    "experience",
+    "openSourceFocus",
+    "openSourceRoles",
+    "roleGroups",
+    "recognitions",
+    "musaProjects",
+    "exploring",
+    "chineseSummary",
+  ]) {
+    assert.match(about, new RegExp(`PROFILE\\.${collection}\\.map\\(`));
+  }
+
+  for (const heading of [
+    "1. About Me",
+    "2. Open Source Focus",
+    "3. Open Source Roles &amp; Recognition",
+    "4. MUSA Ecosystem",
+    "5. Currently Exploring",
+    "6. Contact",
+    "7. 中文简介",
+  ]) {
+    assert.match(about, new RegExp(heading.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&")));
+  }
+
+  assert.match(about, /PROFILE\.identity\.motto/);
+  assert.doesNotMatch(about, />工作<|>技术方向<|>开源方向</);
 });
 
 test("profile sources and data omit unsupported claims", async () => {
@@ -61,7 +79,8 @@ test("profile sources and data omit unsupported claims", async () => {
       .replace(
         "https://www.kubernetes.dev/community/awards/2025/#scheduling",
         "",
-      );
+      )
+      .replace("2025 年，我获得了 Kubernetes SIG Scheduling Contributor Award。", "");
     for (const forbidden of forbiddenDemoText) {
       assert.doesNotMatch(page, new RegExp(forbidden, "i"));
     }
@@ -74,9 +93,10 @@ test("profile sources and data omit unsupported claims", async () => {
   }
 
   assert.equal(PROFILE.experience.length, 2);
-  assert.equal(PROFILE.openSourceRoles.length, 3);
+  assert.equal(PROFILE.openSourceRoles.length, 2);
   assert.equal(PROFILE.collaborations.length, 5);
   assert.equal(PROFILE.musaProjects.length, 2);
+  assert.equal(PROFILE.roleGroups.length, 2);
 });
 
 test("the public profile image is the owned source portrait", async () => {

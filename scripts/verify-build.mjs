@@ -226,54 +226,73 @@ for (const html of [about, cv]) {
   for (const experience of PROFILE.experience) {
     assert.match(main, new RegExp(escapeRegExp(experience.summary)));
   }
-  for (const focus of PROFILE.technicalFocus) {
-    assert.match(main, new RegExp(`<li>${escapeRegExp(focus)}</li>`));
-  }
-  for (const role of PROFILE.openSourceRoles) {
-    assert.match(
-      main,
-      new RegExp(
-        `<a href="${escapeRegExp(role.url)}">${escapeRegExp(role.project)}</a> ${escapeRegExp(role.role)}`,
-      ),
-    );
-  }
-  for (const collaboration of PROFILE.collaborations) {
-    assert.match(
-      main,
-      new RegExp(
-        `<a href="${escapeRegExp(collaboration.url)}">${escapeRegExp(collaboration.project)}</a>：${escapeRegExp(collaboration.activity)}`,
-      ),
-    );
-  }
-  for (const recognition of PROFILE.recognitions) {
-    assert.match(
-      main,
-      new RegExp(
-        `<a href="${escapeRegExp(recognition.url)}">${escapeRegExp(recognition.title)}</a>`,
-      ),
-    );
-  }
-  const mainWithoutApprovedRecognition = PROFILE.recognitions.reduce(
-    (source, recognition) =>
-      source.replace(
-        `<a href="${recognition.url}">${recognition.title}</a>`,
-        "",
-      ),
-    main,
-  );
-  assert.doesNotMatch(mainWithoutApprovedRecognition, /\b(?:19|20)\d{2}\b/);
-  assert.doesNotMatch(
-    mainWithoutApprovedRecognition,
-    /education|award|publication|professor|senior|staff|principal|lead|高级|资深|负责人/i,
-  );
-  assert.doesNotMatch(main, /\b\d+(?:\.\d+)?%/);
 }
 
+const cvMain = profileMain(cv);
+for (const focus of PROFILE.technicalFocus) {
+  assert.match(cvMain, new RegExp(`<li>${escapeRegExp(focus)}</li>`));
+}
+for (const role of PROFILE.openSourceRoles) {
+  assert.match(
+    cvMain,
+    new RegExp(
+      `<a href="${escapeRegExp(role.url)}">${escapeRegExp(role.project)}</a> ${escapeRegExp(role.role)}`,
+    ),
+  );
+}
+for (const collaboration of PROFILE.collaborations) {
+  assert.match(
+    cvMain,
+    new RegExp(
+      `<a href="${escapeRegExp(collaboration.url)}">${escapeRegExp(collaboration.project)}</a>：${escapeRegExp(collaboration.activity)}`,
+    ),
+  );
+}
+for (const recognition of PROFILE.recognitions) {
+  assert.match(
+    cvMain,
+    new RegExp(
+      `<a href="${escapeRegExp(recognition.url)}">${escapeRegExp(recognition.title)}</a>`,
+    ),
+  );
+}
+const cvWithoutApprovedRecognition = PROFILE.recognitions.reduce(
+  (source, recognition) =>
+    source.replace(
+      `<a href="${recognition.url}">${recognition.title}</a>`,
+      "",
+    ),
+  cvMain,
+);
+assert.doesNotMatch(cvWithoutApprovedRecognition, /\b(?:19|20)\d{2}\b/);
+assert.doesNotMatch(
+  cvWithoutApprovedRecognition,
+  /education|award|publication|professor|senior|staff|principal|lead|高级|资深|负责人/i,
+);
+assert.doesNotMatch(cvMain, /\b\d+(?:\.\d+)?%/);
+
 const aboutMain = profileMain(about);
+assert.match(aboutMain, new RegExp(escapeRegExp(PROFILE.identity.motto)));
 for (const focus of PROFILE.openSourceFocus) {
   const focusHeading = focus.topic.replaceAll("&", "&amp;");
   assert.match(aboutMain, new RegExp(`<h3>${escapeRegExp(focusHeading)}</h3>`));
-  for (const project of focus.projects) {
+  assert.match(aboutMain, new RegExp(escapeRegExp(focus.description)));
+}
+for (const role of PROFILE.openSourceRoles) {
+  assert.match(aboutMain, new RegExp(escapeRegExp(role.description)));
+}
+for (const recognition of PROFILE.recognitions) {
+  assert.match(aboutMain, new RegExp(escapeRegExp(recognition.title)));
+  assert.match(aboutMain, new RegExp(escapeRegExp(recognition.description)));
+  assert.match(
+    aboutMain,
+    new RegExp(`<a href="${escapeRegExp(recognition.url)}">Official recognition</a>`),
+  );
+}
+for (const group of PROFILE.roleGroups) {
+  assert.match(aboutMain, new RegExp(escapeRegExp(group.title)));
+  assert.match(aboutMain, new RegExp(escapeRegExp(group.description)));
+  for (const project of group.projects) {
     assert.match(
       aboutMain,
       new RegExp(
@@ -285,16 +304,17 @@ for (const focus of PROFILE.openSourceFocus) {
 for (const project of PROFILE.musaProjects) {
   assert.match(
     aboutMain,
-    new RegExp(
-      `<a href="${escapeRegExp(project.url)}">${escapeRegExp(project.project)}</a>：${escapeRegExp(project.description)}`,
-    ),
+    new RegExp(`<a href="${escapeRegExp(project.url)}">${escapeRegExp(project.project)}</a>`),
   );
+  assert.match(aboutMain, new RegExp(escapeRegExp(project.description)));
 }
 for (const topic of PROFILE.exploring) {
   assert.match(aboutMain, new RegExp(`<li>${escapeRegExp(topic)}</li>`));
 }
-assert.match(aboutMain, new RegExp(escapeRegExp(PROFILE.chineseSummary)));
-assert.match(aboutMain, /WeChat · googs1025/);
+for (const paragraph of PROFILE.chineseSummary) {
+  assert.match(aboutMain, new RegExp(escapeRegExp(paragraph)));
+}
+assert.match(aboutMain, /WeChat: googs1025/);
 
 assert.match(about, /<title>About \| 江振瑜<\/title>/);
 assert.match(
