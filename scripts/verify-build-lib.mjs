@@ -1,5 +1,12 @@
-import { normalizePathname } from "../src/lib/content-validation.mjs";
-import { categoryPath } from "../src/lib/posts.mjs";
+import { readdir, stat } from "node:fs/promises";
+import { extname, resolve } from "node:path";
+
+import { slug as githubSlug } from "github-slugger";
+
+import {
+  decodeLegacyPathname,
+  normalizeRawPathname,
+} from "../src/lib/content-validation.mjs";
 
 export async function assertHtmlFilesOmitTerms(paths, forbiddenTerms, readHtml) {
   for (const path of paths) {
@@ -28,14 +35,35 @@ export function assertExactPathSet(actualPaths, expectedPaths, label) {
 }
 
 export function routePathToHtmlFile(routePath) {
-  const route = normalizePathname(routePath).replace(/^\/+|\/+$/g, "");
+  const route = decodeLegacyPathname(routePath).replace(/^\/+|\/+$/g, "");
   return route ? `${route}/index.html` : "index.html";
 }
 
 export function expectedCategoryHtmlFiles(categories) {
   return [...categories].map((category) =>
-    routePathToHtmlFile(categoryPath(category)),
+    `${normalizeRawPathname(`categories/${category}`)}/index.html`,
   );
+}
+
+export function contentPathToPostId(path) {
+  const extension = extname(path);
+  const withoutExtension = extension ? path.slice(0, -extension.length) : path;
+  return withoutExtension
+    .split("/")
+    .map((segment) => githubSlug(segment))
+    .join("/")
+    .replace(/\/index$/, "");
+}
+
+export async function listFiles(root) {
+  const paths = await readdir(root, { recursive: true });
+  const files = [];
+
+  for (const path of paths) {
+    if ((await stat(resolve(root, path))).isFile()) files.push(path);
+  }
+
+  return files.sort();
 }
 
 const LEGACY_REDIRECT_META =

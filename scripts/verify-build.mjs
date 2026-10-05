@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
-import { access, readFile, readdir, stat } from "node:fs/promises";
+import { access, readFile, readdir } from "node:fs/promises";
+import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 import { parse } from "yaml";
 
@@ -8,16 +10,18 @@ import {
   assertExactPathSet,
   assertHtmlFilesOmitTerms,
   assertLegacyRedirectHtml,
+  contentPathToPostId,
   expectedCategoryHtmlFiles,
   findLegacyRedirectPages,
+  listFiles,
   routePathToHtmlFile,
 } from "./verify-build-lib.mjs";
 
-const repositoryRoot = new URL("../", import.meta.url);
-const distRoot = new URL("dist/", repositoryRoot);
-const blogRoot = new URL("src/content/blog/", repositoryRoot);
+const repositoryRoot = fileURLToPath(new URL("../", import.meta.url));
+const distRoot = resolve(repositoryRoot, "dist");
+const blogRoot = resolve(repositoryRoot, "src/content/blog");
 
-const readDist = (path) => readFile(new URL(path, distRoot), "utf8");
+const readDist = (path) => readFile(resolve(distRoot, path), "utf8");
 const escapeRegExp = (value) =>
   value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
@@ -34,7 +38,7 @@ const readPublishedEntries = async () => {
 
   return Promise.all(
     paths.map(async (path) => {
-      const source = await readFile(new URL(path, blogRoot), "utf8");
+      const source = await readFile(resolve(blogRoot, path), "utf8");
       const frontmatter = source.match(/^---\s*\n([\s\S]*?)\n---(?:\s*\n|$)/)?.[1];
       assert.ok(frontmatter, `expected YAML frontmatter in ${path}`);
       return { path, data: parse(frontmatter) };
@@ -42,13 +46,7 @@ const readPublishedEntries = async () => {
   ).then((entries) => entries.filter(({ data }) => data.draft !== true));
 };
 
-const distEntries = await readdir(distRoot, { recursive: true });
-const distFiles = [];
-for (const path of distEntries) {
-  if ((await stat(new URL(path, distRoot))).isFile()) {
-    distFiles.push(path);
-  }
-}
+const distFiles = await listFiles(distRoot);
 
 const publishedEntries = await readPublishedEntries();
 const localPublishedEntries = publishedEntries.filter(
@@ -73,7 +71,7 @@ const requiredPaths = [
   "pagefind/pagefind-entry.json",
 ];
 await Promise.all(
-  requiredPaths.map((path) => access(new URL(path, distRoot))),
+  requiredPaths.map((path) => access(resolve(distRoot, path))),
 );
 
 const [home, blog, about, cv, notFound, pagefindEntry, sitemapIndex, sitemap, rss] =
@@ -97,7 +95,7 @@ const forbiddenPublicationMarkers = [
 ];
 for (const path of distFiles) {
   const normalizedPath = path.toLowerCase();
-  const normalizedContents = (await readFile(new URL(path, distRoot)))
+  const normalizedContents = (await readFile(resolve(distRoot, path)))
     .toString("utf8")
     .toLowerCase();
 
@@ -178,7 +176,7 @@ const legacyPages = localPublishedEntries.flatMap(({ path, data }) =>
   (data.legacyURLs ?? []).map((legacyURL) => ({
     source: path,
     file: routePathToHtmlFile(legacyURL),
-    target: `/posts/${path.replace(/\.(?:md|mdx)$/, "")}/`,
+    target: `/posts/${contentPathToPostId(path)}/`,
   })),
 );
 const expectedLegacyFiles = legacyPages.map(({ file }) => file);
@@ -190,8 +188,8 @@ const generatedLegacyPages = await findLegacyRedirectPages(
 const generatedCanonicalPostPages = generatedPostPages.filter(
   (path) => !expectedLegacyFileSet.has(path),
 );
-const expectedCanonicalPostPages = localPublishedEntries.map(
-  ({ path }) => `posts/${path.replace(/\.(?:md|mdx)$/, "")}/index.html`,
+const expectedCanonicalPostPages = localPublishedEntries.map(({ path }) =>
+  `posts/${contentPathToPostId(path)}/index.html`,
 );
 
 assertExactPathSet(
@@ -261,7 +259,7 @@ assert.match(
 );
 assert.match(about, /<img[^>]+src="\/images\/profile\.jpg"[^>]+alt="江振瑜"/);
 assert.ok(
-  (await readFile(new URL("images/profile.jpg", distRoot))).byteLength > 0,
+  (await readFile(resolve(distRoot, "images/profile.jpg"))).byteLength > 0,
   "expected the profile image in dist",
 );
 

@@ -80,6 +80,11 @@ test("isLegacyPath rejects external, malformed, and traversal paths", () => {
     "/posts/\u0000draft",
     "/posts/\ndraft",
     "/posts/%2525252541",
+    "/archive/a//b/",
+    "/archive/a%2Fb/",
+    "/archive/a/%2Fb/",
+    "/archive/a/%252Fb/",
+    "/archive/a%5Cb/",
   ]) {
     assert.equal(isLegacyPath(value), false, JSON.stringify(value));
   }

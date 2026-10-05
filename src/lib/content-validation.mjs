@@ -2,9 +2,14 @@ const CONTROL_CHARACTERS = /[\u0000-\u001f\u007f]/;
 const CATEGORY_PATH_FORBIDDEN_CHARACTERS = /[/%?#\\\u0000-\u001f\u007f]/;
 const HTTP_URL = /^https?:\/\//i;
 const LEGACY_PATH_FORBIDDEN_CHARACTERS = /[?#\\\u0000-\u001f\u007f]/;
+const ENCODED_PATH_SEPARATOR = /%(?:2f|5c)/i;
 const MAX_LEGACY_PATH_DECODINGS = 4;
 
-export function normalizePathname(value) {
+export function normalizeRawPathname(value) {
+  return value.normalize("NFC");
+}
+
+export function decodeLegacyPathname(value) {
   let normalized = value;
 
   for (let pass = 0; pass < MAX_LEGACY_PATH_DECODINGS; pass += 1) {
@@ -13,7 +18,7 @@ export function normalizePathname(value) {
     normalized = decoded;
   }
 
-  return normalized.normalize("NFC");
+  return normalizeRawPathname(normalized);
 }
 
 export function isCategoryLabel(value) {
@@ -31,7 +36,7 @@ export function isCategoryLabel(value) {
 function isSafeLegacyPathForm(value) {
   return (
     value.startsWith("/") &&
-    !value.startsWith("//") &&
+    !value.includes("//") &&
     !LEGACY_PATH_FORBIDDEN_CHARACTERS.test(value) &&
     value
       .split("/")
@@ -65,7 +70,10 @@ export function isLegacyPath(value) {
   let decodedPath = value;
 
   for (let pass = 0; pass < MAX_LEGACY_PATH_DECODINGS; pass += 1) {
-    if (!isSafeLegacyPathForm(decodedPath)) {
+    if (
+      !isSafeLegacyPathForm(decodedPath) ||
+      ENCODED_PATH_SEPARATOR.test(decodedPath)
+    ) {
       return false;
     }
 

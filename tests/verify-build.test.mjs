@@ -1,14 +1,36 @@
 import assert from "node:assert/strict";
+import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import test from "node:test";
 
 import {
   assertExactPathSet,
   assertHtmlFilesOmitTerms,
   assertLegacyRedirectHtml,
+  contentPathToPostId,
   findLegacyRedirectPages,
+  listFiles,
   expectedCategoryHtmlFiles,
   routePathToHtmlFile,
 } from "../scripts/verify-build-lib.mjs";
+
+test("raw percent filesystem paths are listed without URL decoding", async () => {
+  const root = await mkdtemp(join(tmpdir(), "verify-build-percent-"));
+  try {
+    await mkdir(join(root, "images"));
+    await writeFile(join(root, "images", "100%.svg"), "<svg />");
+
+    assert.deepEqual(await listFiles(root), ["images/100%.svg"]);
+  } finally {
+    await rm(root, { recursive: true });
+  }
+});
+
+test("expected post IDs use Astro glob loader slug normalization", () => {
+  assert.equal(contentPathToPostId("100%-post.md"), "100-post");
+  assert.equal(contentPathToPostId("nested/Hello World.mdx"), "nested/hello-world");
+});
 
 test("category page verification compares exact normalized paths, not counts", () => {
   const expected = expectedCategoryHtmlFiles(["云原生", "é"]);

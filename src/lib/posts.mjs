@@ -1,7 +1,8 @@
 import {
+  decodeLegacyPathname,
   isCategoryLabel,
   isLegacyPath,
-  normalizePathname,
+  normalizeRawPathname,
 } from "./content-validation.mjs";
 
 export const PAGE_SIZE = 10;
@@ -14,8 +15,14 @@ export function categoryPath(category) {
   return `/categories/${encodeURIComponent(category)}/`;
 }
 
-function normalizedRoutePath(path) {
-  const normalized = normalizePathname(path);
+function normalizedRawRoutePath(path) {
+  const normalized = normalizeRawPathname(path);
+
+  return normalized === "/" ? normalized : normalized.replace(/\/+$/, "");
+}
+
+function normalizedLegacyRoutePath(path) {
+  const normalized = decodeLegacyPathname(path);
 
   return normalized === "/" ? normalized : normalized.replace(/\/+$/, "");
 }
@@ -43,10 +50,10 @@ export function legacyRedirectPaths(posts, { publicFiles = [] } = {}) {
         ({ currentPage }) => `/blog/${currentPage}/`,
       ),
       ...published.flatMap(({ data }) =>
-        (data.categories ?? []).map(categoryPath),
+        (data.categories ?? []).map((category) => `/categories/${category}/`),
       ),
       ...localPosts.map(({ id }) => `/posts/${id}/`),
-    ].map(normalizedRoutePath),
+    ].map(normalizedRawRoutePath),
   );
   const routes = [];
   const reservedPrefixes = ["/pagefind", "/_astro"];
@@ -57,7 +64,7 @@ export function legacyRedirectPaths(posts, { publicFiles = [] } = {}) {
         throw new TypeError(`Invalid legacy URL: "${legacyURL}"`);
       }
 
-      const normalized = normalizedRoutePath(legacyURL);
+      const normalized = normalizedLegacyRoutePath(legacyURL);
       if (
         occupied.has(normalized) ||
         reservedPrefixes.some(

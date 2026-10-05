@@ -73,6 +73,33 @@ test("legacy redirects are generated only for published local posts", () => {
   ]);
 });
 
+test("legacy route checks preserve percent characters in raw post IDs and public files", () => {
+  const posts = [
+    {
+      id: "100%-post",
+      data: {
+        title: "Percent post",
+        draft: false,
+        pubDate: new Date("2025-01-01"),
+        legacyURLs: ["/old/percent-post/"],
+      },
+    },
+  ];
+
+  assert.deepEqual(
+    legacyRedirectPaths(posts, { publicFiles: ["images/100%.svg"] }),
+    [
+      {
+        params: { legacy: "old/percent-post" },
+        props: {
+          title: "Percent post",
+          target: "/posts/100%-post/",
+        },
+      },
+    ],
+  );
+});
+
 test("legacy redirects reject duplicate, generated, and public path collisions", () => {
   const post = (id, legacyURLs) => ({
     id,
