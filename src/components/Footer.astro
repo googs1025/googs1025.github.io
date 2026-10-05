@@ -1,0 +1,18 @@
+---
+import { SITE } from "@/data/site";
+
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="shell footer-inner">
+    <p>&copy; {year} 江振瑜</p>
+    <nav aria-label="页脚链接">
+      <ul class="footer-links">
+        <li><a href={SITE.github}>GitHub</a></li>
+        <li><a href={`mailto:${SITE.email}`}>Email</a></li>
+        <li><a href="/rss.xml">RSS</a></li>
+      </ul>
+    </nav>
+  </div>
+</footer>

@@ -1,0 +1,51 @@
+---
+import type { MarkdownHeading } from "astro";
+
+interface Props {
+  headings: MarkdownHeading[];
+}
+
+const { headings } = Astro.props;
+const eligibleHeadings = headings.filter(
+  (heading) => heading.depth === 2 || heading.depth === 3,
+);
+
+const sections: Array<{
+  heading: MarkdownHeading;
+  children: MarkdownHeading[];
+}> = [];
+
+for (const heading of eligibleHeadings) {
+  const section = sections.at(-1);
+
+  if (heading.depth === 3 && section?.heading.depth === 2) {
+    section.children.push(heading);
+  } else {
+    sections.push({ heading, children: [] });
+  }
+}
+---
+
+{
+  eligibleHeadings.length >= 2 && (
+    <nav class="toc" aria-label="本文目录">
+      <p class="toc-title">本文目录</p>
+      <ol class="toc-list">
+        {sections.map((section) => (
+          <li class={`toc-depth-${section.heading.depth}`}>
+            <a href={`#${section.heading.slug}`}>{section.heading.text}</a>
+            {section.children.length > 0 && (
+              <ol class="toc-sublist">
+                {section.children.map((heading) => (
+                  <li class={`toc-depth-${heading.depth}`}>
+                    <a href={`#${heading.slug}`}>{heading.text}</a>
+                  </li>
+                ))}
+              </ol>
+            )}
+          </li>
+        ))}
+      </ol>
+    </nav>
+  )
+}

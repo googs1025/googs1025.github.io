@@ -1,0 +1,36 @@
+---
+import { getCollection, type CollectionEntry } from "astro:content";
+
+import PostList from "@/components/PostList.astro";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { publishedPosts } from "@/lib/posts.mjs";
+
+interface Props {
+  category: string;
+  posts: CollectionEntry<"blog">[];
+}
+
+export async function getStaticPaths() {
+  const posts: CollectionEntry<"blog">[] = publishedPosts(
+    await getCollection("blog"),
+  );
+  const categories = [...new Set(posts.flatMap(({ data }) => data.categories))];
+
+  return categories.map((category) => ({
+    params: { category },
+    props: {
+      category,
+      posts: posts.filter(({ data }) => data.categories.includes(category)),
+    },
+  }));
+}
+
+const { category, posts } = Astro.props;
+---
+
+<BaseLayout title={`分类：${category}`}>
+  <section class="content" aria-labelledby="page-title">
+    <h1 id="page-title">分类：{category}</h1>
+    <PostList posts={posts} />
+  </section>
+</BaseLayout>

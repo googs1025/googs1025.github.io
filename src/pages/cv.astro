@@ -1,0 +1,66 @@
+---
+import { PROFILE } from "@/data/profile.mjs";
+import { SITE } from "@/data/site";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+
+const emailHref = `mailto:${SITE.email}`;
+---
+
+<BaseLayout
+  title="CV"
+  description={`${PROFILE.identity.name}（${PROFILE.identity.latinName}）的工作经历、开源角色与技术方向。`}
+>
+  <article class="content cv-page">
+    <header class="cv-header">
+      <p class="profile-label">Curriculum Vitae</p>
+      <h1>{PROFILE.identity.name}</h1>
+      <p class="profile-handle">
+        {PROFILE.identity.latinName} · {PROFILE.identity.handle}
+      </p>
+    </header>
+
+    <section class="cv-section" aria-labelledby="cv-summary">
+      <h2 id="cv-summary">Professional Summary / 专业概览</h2>
+      <p>{PROFILE.identity.summary}</p>
+    </section>
+
+    <section class="cv-section" aria-labelledby="cv-experience">
+      <h2 id="cv-experience">Experience / 工作经历</h2>
+      {PROFILE.experience.map((item) => (
+        <div class="cv-entry">
+          <h3>{item.organization}</h3>
+          <p>{item.summary}</p>
+        </div>
+      ))}
+    </section>
+
+    <section class="cv-section" aria-labelledby="cv-open-source">
+      <h2 id="cv-open-source">Open Source / 开源经历</h2>
+      <ul class="role-list">
+        {PROFILE.openSourceRoles.map((item) => (
+          <li>
+            <a href={item.url}>{item.project}</a>{" "}{item.role}
+          </li>
+        ))}
+        {PROFILE.collaborations.map((item) => (
+          <li><a href={item.url}>{item.project}</a>：{item.activity}</li>
+        ))}
+      </ul>
+    </section>
+
+    <section class="cv-section" aria-labelledby="cv-focus">
+      <h2 id="cv-focus">Technical Focus / 技术方向</h2>
+      <ul class="fact-list">
+        {PROFILE.technicalFocus.map((focus) => <li>{focus}</li>)}
+      </ul>
+    </section>
+
+    <section class="cv-section" aria-labelledby="cv-contact">
+      <h2 id="cv-contact">Contact / 联系方式</h2>
+      <ul class="contact-list">
+        <li><a href={SITE.github}>GitHub · {SITE.handle.replace(/^@/, "")}</a></li>
+        <li><a href={emailHref}>{SITE.email}</a></li>
+      </ul>
+    </section>
+  </article>
+</BaseLayout>

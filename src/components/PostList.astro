@@ -1,0 +1,61 @@
+---
+import type { CollectionEntry } from "astro:content";
+
+import { postListItem } from "@/lib/posts.mjs";
+
+interface Props {
+  posts: CollectionEntry<"blog">[];
+}
+
+interface CategoryLink {
+  name: string;
+  url: string;
+}
+
+const { posts } = Astro.props;
+---
+
+<ul class="post-list">
+  {
+    posts.map((post) => {
+      const item = postListItem(post);
+
+      return (
+        <li>
+          <article>
+            <h2 class="post-title">
+              <a
+                href={item.url}
+                target={item.target}
+                rel={item.rel}
+                aria-label={item.linkAriaLabel}
+              >
+                {item.title}
+              </a>
+              {
+                item.isExternal && (
+                  <span class="badge external-badge">{item.externalText}</span>
+                )
+              }
+            </h2>
+            <div class="post-meta">
+              <time datetime={item.machineDate}>{item.humanDate}</time>
+              {
+                item.hasCategories && (
+                  <span class="post-categories" aria-label="文章分类">
+                    {item.categories.map((category: CategoryLink) => (
+                      <a class="badge" href={category.url}>
+                        {category.name}
+                      </a>
+                    ))}
+                  </span>
+                )
+              }
+            </div>
+            <p class="post-description">{item.description}</p>
+          </article>
+        </li>
+      );
+    })
+  }
+</ul>

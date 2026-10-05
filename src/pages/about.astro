@@ -1,0 +1,68 @@
+---
+import { PROFILE } from "@/data/profile.mjs";
+import { SITE } from "@/data/site";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+
+const emailHref = `mailto:${SITE.email}`;
+---
+
+<BaseLayout
+  title="About"
+  description={`${PROFILE.identity.name}（${PROFILE.identity.latinName}）的个人简介、工作方向与开源社区参与。`}
+>
+  <article class="content profile-page" data-pagefind-body>
+    <header class="profile-intro">
+      <img
+        class="profile-image"
+        src="/images/profile.jpg"
+        alt={PROFILE.identity.name}
+        width="420"
+        height="600"
+      />
+      <div>
+        <p class="profile-label">About</p>
+        <h1>{PROFILE.identity.name}</h1>
+        <p class="profile-handle">
+          {PROFILE.identity.latinName} · {PROFILE.identity.handle}
+        </p>
+        <p class="profile-summary">{PROFILE.identity.summary}</p>
+      </div>
+    </header>
+
+    <section class="profile-section" aria-labelledby="about-work">
+      <h2 id="about-work">工作</h2>
+      <ul class="fact-list">
+        {PROFILE.experience.map((item) => <li>{item.summary}</li>)}
+      </ul>
+    </section>
+
+    <section class="profile-section" aria-labelledby="about-focus">
+      <h2 id="about-focus">技术方向</h2>
+      <ul class="fact-list">
+        {PROFILE.technicalFocus.map((focus) => <li>{focus}</li>)}
+      </ul>
+    </section>
+
+    <section class="profile-section" aria-labelledby="about-open-source">
+      <h2 id="about-open-source">开源社区</h2>
+      <ul class="role-list">
+        {PROFILE.openSourceRoles.map((item) => (
+          <li>
+            <a href={item.url}>{item.project}</a>{" "}{item.role}
+          </li>
+        ))}
+        {PROFILE.collaborations.map((item) => (
+          <li><a href={item.url}>{item.project}</a>：{item.activity}</li>
+        ))}
+      </ul>
+    </section>
+
+    <section class="profile-section" aria-labelledby="about-contact">
+      <h2 id="about-contact">联系</h2>
+      <ul class="contact-list">
+        <li><a href={SITE.github}>GitHub · {SITE.handle.replace(/^@/, "")}</a></li>
+        <li><a href={emailHref}>{SITE.email}</a></li>
+      </ul>
+    </section>
+  </article>
+</BaseLayout>

@@ -1,0 +1,20 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+---
+
+<BaseLayout
+  title="页面未找到"
+  description="你访问的页面不存在，或已经移动。"
+  canonical={false}
+  noindex
+>
+  <section class="content not-found" aria-labelledby="not-found-title">
+    <p class="not-found-code" aria-hidden="true">404</p>
+    <h1 id="not-found-title">页面未找到</h1>
+    <p>你访问的页面不存在，或已经移动。可以返回首页，或继续浏览文章。</p>
+    <nav class="not-found-actions" aria-label="页面恢复选项">
+      <a class="button" href="/">返回首页</a>
+      <a class="button" href="/blog/">浏览文章</a>
+    </nav>
+  </section>
+</BaseLayout>

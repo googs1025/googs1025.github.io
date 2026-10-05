@@ -1,0 +1,37 @@
+---
+import { getCollection, type CollectionEntry } from "astro:content";
+
+import PostList from "@/components/PostList.astro";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { archiveDynamicPages, publishedPosts } from "@/lib/posts.mjs";
+
+interface Props {
+  items: CollectionEntry<"blog">[];
+  currentPage: number;
+  previousHref: string;
+  nextHref?: string;
+}
+
+export async function getStaticPaths() {
+  const published = publishedPosts(await getCollection("blog"));
+
+  return archiveDynamicPages(published).map((page) => ({
+    params: { page: String(page.currentPage) },
+    props: page,
+  }));
+}
+
+const { items, currentPage, previousHref, nextHref } = Astro.props;
+---
+
+<BaseLayout title={`全部文章 · 第 ${currentPage} 页`}>
+  <section class="content" aria-labelledby="page-title">
+    <h1 id="page-title">全部文章</h1>
+    <PostList posts={items} />
+    <nav aria-label="文章分页" class="pagination">
+      <a href={previousHref} rel="prev">上一页</a>
+      <span aria-current="page">第 {currentPage} 页</span>
+      {nextHref && <a href={nextHref} rel="next">下一页</a>}
+    </nav>
+  </section>
+</BaseLayout>
