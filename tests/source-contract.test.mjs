@@ -418,7 +418,7 @@ test("post routes render local published entries with deterministic adjacent pos
   assert.match(page, /publishedPosts\(/);
   assert.match(page, /!post\.data\.canonicalURL/);
   assert.match(page, /adjacentPosts\(/);
-  assert.match(page, /params:\s*\{\s*slug:\s*post\.id\s*\}/);
+  assert.match(page, /params:\s*\{\s*slug:\s*postRouteId\(post\.id\)\s*\}/);
   assert.match(page, /await\s+render\(post\)/);
   assert.match(page, /<PostLayout[^>]*post=\{post\}[^>]*headings=\{headings\}/s);
   assert.match(page, /<Content\s*\/>/);

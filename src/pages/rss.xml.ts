@@ -3,7 +3,7 @@ import type { APIRoute } from "astro";
 import { getCollection, type CollectionEntry } from "astro:content";
 
 import { SITE } from "@/data/site";
-import { publishedPosts } from "@/lib/posts.mjs";
+import { postPath, publishedPosts } from "@/lib/posts.mjs";
 
 export const GET: APIRoute = async ({ site }) => {
   const posts = publishedPosts(
@@ -18,7 +18,7 @@ export const GET: APIRoute = async ({ site }) => {
       title: post.data.title,
       description: post.data.description,
       pubDate: post.data.pubDate,
-      link: post.data.canonicalURL ?? `/posts/${post.id}/`,
+      link: post.data.canonicalURL ?? postPath(post.id),
     })),
   });
 };

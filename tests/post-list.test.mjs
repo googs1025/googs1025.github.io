@@ -61,3 +61,17 @@ test("post list view model suppresses the category container when categories are
   assert.equal(item?.hasCategories, false);
   assert.deepEqual(item?.categories, []);
 });
+
+test("post list view model NFC-normalizes internal post links", () => {
+  const item = postsModule.postListItem({
+    id: "e\u0301",
+    data: {
+      title: "Unicode post",
+      description: "Description",
+      pubDate: new Date("2025-01-01T00:00:00.000Z"),
+      categories: [],
+    },
+  });
+
+  assert.equal(item.url, "/posts/é/");
+});

@@ -9,8 +9,15 @@ const {
   hasMeaningfulUpdate,
   legacyRedirectPaths,
   paginatePosts,
+  postPath,
+  postRouteId,
   publishedPosts,
 } = postsModule;
+
+test("post route helpers NFC-normalize Astro entry IDs", () => {
+  assert.equal(postRouteId("archive/e\u0301"), "archive/é");
+  assert.equal(postPath("archive/e\u0301"), "/posts/archive/é/");
+});
 
 test("legacy redirects are generated only for published local posts", () => {
   const posts = [
@@ -97,6 +104,24 @@ test("legacy route checks preserve percent characters in raw post IDs and public
         },
       },
     ],
+  );
+});
+
+test("legacy redirect targets and collisions use NFC post IDs", () => {
+  const post = {
+    id: "e\u0301",
+    data: {
+      title: "Unicode post",
+      draft: false,
+      pubDate: new Date("2025-01-01"),
+      legacyURLs: ["/old/unicode/"],
+    },
+  };
+
+  assert.equal(legacyRedirectPaths([post])[0].props.target, "/posts/é/");
+  assert.throws(
+    () => legacyRedirectPaths([{ ...post, data: { ...post.data, legacyURLs: ["/posts/é/"] } }]),
+    { message: 'Legacy URL collision: "/posts/é/"' },
   );
 });
 

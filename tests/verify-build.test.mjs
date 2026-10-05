@@ -30,6 +30,9 @@ test("raw percent filesystem paths are listed without URL decoding", async () =>
 test("expected post IDs use Astro glob loader slug normalization", () => {
   assert.equal(contentPathToPostId("100%-post.md"), "100-post");
   assert.equal(contentPathToPostId("nested/Hello World.mdx"), "nested/hello-world");
+  assert.equal(contentPathToPostId("ignored.md", "custom-route"), "custom-route");
+  assert.equal(contentPathToPostId("e\u0301.md"), "é");
+  assert.equal(contentPathToPostId("ignored.md", "e\u0301"), "é");
 });
 
 test("category page verification compares exact normalized paths, not counts", () => {
@@ -141,6 +144,18 @@ test("legacy redirect HTML requires canonical, immediate refresh, and fallback l
         "old/post/index.html",
       ),
     { message: "legacy redirect old/post/index.html must refresh immediately to /posts/current/" },
+  );
+});
+
+test("legacy redirect verification accepts URL-encoded Unicode canonicals", () => {
+  const html = `
+    <link rel="canonical" href="https://googs1025.github.io/posts/%C3%A9/">
+    <meta http-equiv="refresh" content="0;url=/posts/é/">
+    <p><a href="/posts/é/">前往文章的新地址</a></p>
+  `;
+
+  assert.doesNotThrow(() =>
+    assertLegacyRedirectHtml(html, "/posts/é/", "old/unicode/index.html"),
   );
 });
 

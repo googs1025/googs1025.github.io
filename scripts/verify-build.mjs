@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 import { parse } from "yaml";
 
 import { PROFILE } from "../src/data/profile.mjs";
+import { postPath } from "../src/lib/posts.mjs";
 import {
   assertExactPathSet,
   assertHtmlFilesOmitTerms,
@@ -176,7 +177,7 @@ const legacyPages = localPublishedEntries.flatMap(({ path, data }) =>
   (data.legacyURLs ?? []).map((legacyURL) => ({
     source: path,
     file: routePathToHtmlFile(legacyURL),
-    target: `/posts/${contentPathToPostId(path)}/`,
+    target: postPath(contentPathToPostId(path, data.slug)),
   })),
 );
 const expectedLegacyFiles = legacyPages.map(({ file }) => file);
@@ -188,8 +189,8 @@ const generatedLegacyPages = await findLegacyRedirectPages(
 const generatedCanonicalPostPages = generatedPostPages.filter(
   (path) => !expectedLegacyFileSet.has(path),
 );
-const expectedCanonicalPostPages = localPublishedEntries.map(({ path }) =>
-  `posts/${contentPathToPostId(path)}/index.html`,
+const expectedCanonicalPostPages = localPublishedEntries.map(({ path, data }) =>
+  `posts/${contentPathToPostId(path, data.slug)}/index.html`,
 );
 
 assertExactPathSet(

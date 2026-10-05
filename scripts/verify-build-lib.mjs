@@ -7,6 +7,7 @@ import {
   decodeLegacyPathname,
   normalizeRawPathname,
 } from "../src/lib/content-validation.mjs";
+import { postRouteId } from "../src/lib/posts.mjs";
 
 export async function assertHtmlFilesOmitTerms(paths, forbiddenTerms, readHtml) {
   for (const path of paths) {
@@ -45,14 +46,16 @@ export function expectedCategoryHtmlFiles(categories) {
   );
 }
 
-export function contentPathToPostId(path) {
+export function contentPathToPostId(path, frontmatterSlug) {
   const extension = extname(path);
   const withoutExtension = extension ? path.slice(0, -extension.length) : path;
-  return withoutExtension
+  const generatedId = withoutExtension
     .split("/")
     .map((segment) => githubSlug(segment))
     .join("/")
     .replace(/\/index$/, "");
+
+  return postRouteId(frontmatterSlug ? String(frontmatterSlug) : generatedId);
 }
 
 export async function listFiles(root) {
@@ -87,10 +90,13 @@ function escapeRegExp(value) {
 
 export function assertLegacyRedirectHtml(html, target, path) {
   const escapedTarget = escapeRegExp(target);
+  const escapedCanonical = escapeRegExp(
+    new URL(target, "https://googs1025.github.io").href,
+  );
 
   if (
     !new RegExp(
-      `<link\\s+rel=["']canonical["']\\s+href=["']https://googs1025\\.github\\.io${escapedTarget}["']`,
+      `<link\\s+rel=["']canonical["']\\s+href=["']${escapedCanonical}["']`,
     ).test(html)
   ) {
     throw new Error(`legacy redirect ${path} must canonicalize to ${target}`);

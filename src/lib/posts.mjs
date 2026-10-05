@@ -7,6 +7,18 @@ import {
 
 export const PAGE_SIZE = 10;
 
+export function postRouteId(id) {
+  if (typeof id !== "string" || id.length === 0) {
+    throw new TypeError("post id must be a non-empty string");
+  }
+
+  return normalizeRawPathname(id);
+}
+
+export function postPath(id) {
+  return `/posts/${postRouteId(id)}/`;
+}
+
 export function categoryPath(category) {
   if (!isCategoryLabel(category)) {
     throw new TypeError("category must be a safe path segment");
@@ -52,7 +64,7 @@ export function legacyRedirectPaths(posts, { publicFiles = [] } = {}) {
       ...published.flatMap(({ data }) =>
         (data.categories ?? []).map((category) => `/categories/${category}/`),
       ),
-      ...localPosts.map(({ id }) => `/posts/${id}/`),
+      ...localPosts.map(({ id }) => postPath(id)),
     ].map(normalizedRawRoutePath),
   );
   const routes = [];
@@ -80,7 +92,7 @@ export function legacyRedirectPaths(posts, { publicFiles = [] } = {}) {
         params: { legacy: normalized.slice(1) },
         props: {
           title: post.data.title,
-          target: `/posts/${post.id}/`,
+          target: postPath(post.id),
         },
       });
     }
@@ -197,7 +209,7 @@ export function postListItem(post) {
   return {
     title: post.data.title,
     description: post.data.description,
-    url: post.data.canonicalURL ?? `/posts/${post.id}/`,
+    url: post.data.canonicalURL ?? postPath(post.id),
     isExternal,
     target: isExternal ? "_blank" : undefined,
     rel: isExternal ? "noreferrer" : undefined,
