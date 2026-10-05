@@ -1,5 +1,5 @@
 /** @typedef {{ organization: string, status: "current", focus: string, summary: string } | { organization: string, status: "previous", role: string, summary: string }} Experience */
-/** @typedef {{ project: string, role: string, url: string }} OpenSourceRole */
+/** @typedef {{ project: string, role: string, url: string, description: string }} OpenSourceRole */
 /** @typedef {{ project: string, activity: string, url: string }} Collaboration */
 /** @typedef {{ project: string, description: string, url: string }} Project */
 
@@ -7,24 +7,25 @@ const identity = Object.freeze({
   name: "江振瑜",
   latinName: "CYJiang",
   handle: "@googs1025",
-  profession: "云原生开发与基础设施工程师",
   summary:
-    "云原生开发与基础设施工程师，关注 Kubernetes 调度、GPU 资源管理与 LLM 推理基础设施。",
+    "I’m Jiang Zhenyu (CYJiang). My open source work focuses on Kubernetes scheduling, GPU infrastructure, LLM inference infrastructure, and accelerator-aware workload orchestration.",
+  motto: "I am a slow walker, but I never walk backwards.",
 });
 
 /** @type {readonly Experience[]} */
 const experience = Object.freeze([
   Object.freeze({
-    organization: "马上消费金融",
+    organization: "Current role",
     status: "current",
-    focus: "云原生基础设施",
-    summary: "目前在马上消费金融从事云原生基础设施相关工作。",
+    focus: "MUSA open source ecosystem",
+    summary:
+      "In my current role, I help grow the MUSA open source ecosystem and explore its integration with cloud native and AI infrastructure.",
   }),
   Object.freeze({
     organization: "ByteDance",
     status: "previous",
-    role: "云平台工程师",
-    summary: "此前曾在 ByteDance 担任云平台工程师。",
+    role: "Cloud platform engineering",
+    summary: "Previously, I worked on cloud platform engineering at ByteDance.",
   }),
 ]);
 
@@ -40,16 +41,14 @@ const openSourceRoles = Object.freeze([
     project: "Kubernetes",
     role: "Member",
     url: "https://github.com/kubernetes/kubernetes",
+    description: "Contributing to Kubernetes and the SIG Scheduling ecosystem.",
   }),
   Object.freeze({
     project: "Aibrix",
     role: "Maintainer",
     url: "https://github.com/vllm-project/aibrix",
-  }),
-  Object.freeze({
-    project: "Volcano",
-    role: "Member",
-    url: "https://github.com/volcano-sh/volcano",
+    description:
+      "Supporting the development and community of cloud native GenAI inference infrastructure.",
   }),
 ]);
 
@@ -82,9 +81,25 @@ const collaborations = Object.freeze([
   }),
 ]);
 
+const roleGroups = Object.freeze([
+  Object.freeze({
+    title: "Reviewer",
+    description:
+      "Participating in design discussions and code reviews for scheduler-plugins, descheduler, and llmaz.",
+    projects: Object.freeze(collaborations.slice(0, 3)),
+  }),
+  Object.freeze({
+    title: "Community Member",
+    description: "Participating in the Volcano and Koordinator communities.",
+    projects: Object.freeze(collaborations.slice(3)),
+  }),
+]);
+
 const openSourceFocus = Object.freeze([
   Object.freeze({
     topic: "Kubernetes Scheduling",
+    description:
+      "Scheduling, resource orchestration, batch workloads, and related projects including scheduler-plugins, descheduler, Volcano, and Koordinator.",
     projects: Object.freeze([
       Object.freeze({
         project: "scheduler-plugins",
@@ -106,6 +121,8 @@ const openSourceFocus = Object.freeze([
   }),
   Object.freeze({
     topic: "LLM Inference Infrastructure",
+    description:
+      "Cloud native infrastructure for scalable model serving, including Aibrix, llmaz, vLLM, SGLang, and llm-d.",
     projects: Object.freeze([
       Object.freeze({
         project: "Aibrix",
@@ -131,6 +148,8 @@ const openSourceFocus = Object.freeze([
   }),
   Object.freeze({
     topic: "GPU & Heterogeneous Computing",
+    description:
+      "GPU management, Kubernetes device integration, accelerator-aware scheduling, CUDA, and MUSA.",
     projects: Object.freeze([
       Object.freeze({
         project: "CUDA",
@@ -163,6 +182,8 @@ const recognitions = Object.freeze([
   Object.freeze({
     title: "Kubernetes Contributor Award 2025 — SIG Scheduling",
     url: "https://www.kubernetes.dev/community/awards/2025/#scheduling",
+    description:
+      "Recognized for contributions across Kubernetes scheduler, descheduler, and scheduler-plugins.",
   }),
 ]);
 
@@ -172,8 +193,11 @@ const exploring = Object.freeze([
   "Large-scale LLM inference workloads",
 ]);
 
-const chineseSummary =
-  "我的开源工作主要关注 Kubernetes 调度、GPU 基础设施、LLM 推理基础设施和异构算力工作负载编排。目前也在协助建设 MUSA 开源生态，探索 MUSA 与云原生及 AI 基础设施的结合。";
+const chineseSummary = Object.freeze([
+  "我是江振瑜（CYJiang）。我的开源工作主要关注 Kubernetes 调度、GPU 基础设施、LLM 推理基础设施和异构算力工作负载编排。目前，我也会在工作中协助建设和扩展 MUSA 开源生态，探索 MUSA 与云原生及 AI 基础设施的结合。此前曾在字节跳动从事云平台相关工作。",
+  "我是 Kubernetes Member、Aibrix Maintainer，以及 scheduler-plugins、descheduler 和 llmaz Reviewer，同时参与 Volcano 与 Koordinator 社区。2025 年，我获得了 Kubernetes SIG Scheduling Contributor Award。",
+  "当前主要学习和探索 MUSA、GPU 计算、Kubernetes GPU 管理与调度，以及大规模 LLM 推理工作负载。",
+]);
 
 export const PROFILE = Object.freeze({
   identity,
@@ -181,6 +205,7 @@ export const PROFILE = Object.freeze({
   technicalFocus,
   openSourceRoles,
   collaborations,
+  roleGroups,
   openSourceFocus,
   musaProjects,
   recognitions,

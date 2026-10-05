@@ -8,22 +8,23 @@ test("profile data contains the exact approved identity and experience", () => {
     name: "江振瑜",
     latinName: "CYJiang",
     handle: "@googs1025",
-    profession: "云原生开发与基础设施工程师",
     summary:
-      "云原生开发与基础设施工程师，关注 Kubernetes 调度、GPU 资源管理与 LLM 推理基础设施。",
+      "I’m Jiang Zhenyu (CYJiang). My open source work focuses on Kubernetes scheduling, GPU infrastructure, LLM inference infrastructure, and accelerator-aware workload orchestration.",
+    motto: "I am a slow walker, but I never walk backwards.",
   });
   assert.deepEqual(PROFILE.experience, [
     {
-      organization: "马上消费金融",
+      organization: "Current role",
       status: "current",
-      focus: "云原生基础设施",
-      summary: "目前在马上消费金融从事云原生基础设施相关工作。",
+      focus: "MUSA open source ecosystem",
+      summary:
+        "In my current role, I help grow the MUSA open source ecosystem and explore its integration with cloud native and AI infrastructure.",
     },
     {
       organization: "ByteDance",
       status: "previous",
-      role: "云平台工程师",
-      summary: "此前曾在 ByteDance 担任云平台工程师。",
+      role: "Cloud platform engineering",
+      summary: "Previously, I worked on cloud platform engineering at ByteDance.",
     },
   ]);
 });
@@ -39,16 +40,14 @@ test("profile data contains only the approved focus, roles, and projects", () =>
       project: "Kubernetes",
       role: "Member",
       url: "https://github.com/kubernetes/kubernetes",
+      description: "Contributing to Kubernetes and the SIG Scheduling ecosystem.",
     },
     {
       project: "Aibrix",
       role: "Maintainer",
       url: "https://github.com/vllm-project/aibrix",
-    },
-    {
-      project: "Volcano",
-      role: "Member",
-      url: "https://github.com/volcano-sh/volcano",
+      description:
+        "Supporting the development and community of cloud native GenAI inference infrastructure.",
     },
   ]);
   assert.deepEqual(PROFILE.collaborations, [
@@ -87,7 +86,6 @@ test("profile data contains only the approved focus, roles, and projects", () =>
     [
       "Kubernetes",
       "Aibrix",
-      "Volcano",
       "scheduler-plugins",
       "descheduler",
       "llmaz",
@@ -101,6 +99,8 @@ test("profile data contains only the approved focus, roles, and projects", () =>
       {
         title: "Kubernetes Contributor Award 2025 — SIG Scheduling",
         url: "https://www.kubernetes.dev/community/awards/2025/#scheduling",
+        description:
+          "Recognized for contributions across Kubernetes scheduler, descheduler, and scheduler-plugins.",
       },
     ],
   );
@@ -116,6 +116,34 @@ test("profile data contains only the approved focus, roles, and projects", () =>
       "GPU & Heterogeneous Computing",
     ],
   );
+  assert.deepEqual(
+    PROFILE.openSourceFocus.map(({ description }) => description),
+    [
+      "Scheduling, resource orchestration, batch workloads, and related projects including scheduler-plugins, descheduler, Volcano, and Koordinator.",
+      "Cloud native infrastructure for scalable model serving, including Aibrix, llmaz, vLLM, SGLang, and llm-d.",
+      "GPU management, Kubernetes device integration, accelerator-aware scheduling, CUDA, and MUSA.",
+    ],
+  );
+  assert.deepEqual(
+    PROFILE.roleGroups.map(({ title, description }) => ({ title, description })),
+    [
+      {
+        title: "Reviewer",
+        description:
+          "Participating in design discussions and code reviews for scheduler-plugins, descheduler, and llmaz.",
+      },
+      {
+        title: "Community Member",
+        description:
+          "Participating in the Volcano and Koordinator communities.",
+      },
+    ],
+  );
+  assert.deepEqual(PROFILE.chineseSummary, [
+    "我是江振瑜（CYJiang）。我的开源工作主要关注 Kubernetes 调度、GPU 基础设施、LLM 推理基础设施和异构算力工作负载编排。目前，我也会在工作中协助建设和扩展 MUSA 开源生态，探索 MUSA 与云原生及 AI 基础设施的结合。此前曾在字节跳动从事云平台相关工作。",
+    "我是 Kubernetes Member、Aibrix Maintainer，以及 scheduler-plugins、descheduler 和 llmaz Reviewer，同时参与 Volcano 与 Koordinator 社区。2025 年，我获得了 Kubernetes SIG Scheduling Contributor Award。",
+    "当前主要学习和探索 MUSA、GPU 计算、Kubernetes GPU 管理与调度，以及大规模 LLM 推理工作负载。",
+  ]);
 });
 
 test("profile project URLs are frozen HTTPS GitHub links", () => {
@@ -131,6 +159,8 @@ test("profile project URLs are frozen HTTPS GitHub links", () => {
     PROFILE.musaProjects,
     PROFILE.recognitions,
     PROFILE.exploring,
+    PROFILE.roleGroups,
+    PROFILE.chineseSummary,
   ]) {
     assert.equal(Object.isFrozen(collection), true);
   }
@@ -156,6 +186,10 @@ test("profile project URLs are frozen HTTPS GitHub links", () => {
       assert.equal(Object.isFrozen(project), true);
     }
   }
+  for (const group of PROFILE.roleGroups) {
+    assert.equal(Object.isFrozen(group), true);
+    assert.equal(Object.isFrozen(group.projects), true);
+  }
 });
 
 test("profile data has no unsupported credentials, metrics, or title levels", () => {
@@ -180,10 +214,11 @@ test("profile data has no unsupported credentials, metrics, or title levels", ()
     .replace(
       "https://www.kubernetes.dev/community/awards/2025/#scheduling",
       "",
-    );
+    )
+    .replace("2025 年，我获得了 Kubernetes SIG Scheduling Contributor Award。", "");
   assert.doesNotMatch(serialized, /\b(?:19|20)\d{2}\b/);
   assert.doesNotMatch(
     serialized,
-    /education|university|publication|professor|senior|staff|principal|lead|高级|资深|负责人/i,
+    /education|university|publication|professor|senior|staff|principal|lead|高级|资深|负责人|马上消费金融|云原生开发与基础设施工程师/i,
   );
 });
