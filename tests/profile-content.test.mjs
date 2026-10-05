@@ -24,6 +24,7 @@ test("About and CV render repeated profile facts from shared data", async () => 
       "technicalFocus",
       "openSourceRoles",
       "collaborations",
+      "recognitions",
     ]) {
       assert.match(page, new RegExp(`PROFILE\\.${collection}\\.map\\(`));
     }
@@ -55,12 +56,18 @@ test("profile sources and data omit unsupported claims", async () => {
   ];
 
   for (const page of [about, cv, dataSource]) {
+    const sourceWithoutApprovedRecognition = page
+      .replace("Kubernetes Contributor Award 2025 — SIG Scheduling", "")
+      .replace(
+        "https://www.kubernetes.dev/community/awards/2025/#scheduling",
+        "",
+      );
     for (const forbidden of forbiddenDemoText) {
       assert.doesNotMatch(page, new RegExp(forbidden, "i"));
     }
-    assert.doesNotMatch(page, /\b(?:19|20)\d{2}\b/);
+    assert.doesNotMatch(sourceWithoutApprovedRecognition, /\b(?:19|20)\d{2}\b/);
     assert.doesNotMatch(
-      page,
+      sourceWithoutApprovedRecognition,
       /education|award|publication|professor|senior|staff|principal|lead|高级|资深|负责人/i,
     );
     assert.doesNotMatch(page, /\b\d+(?:\.\d+)?%/);
@@ -68,7 +75,8 @@ test("profile sources and data omit unsupported claims", async () => {
 
   assert.equal(PROFILE.experience.length, 2);
   assert.equal(PROFILE.openSourceRoles.length, 3);
-  assert.equal(PROFILE.collaborations.length, 2);
+  assert.equal(PROFILE.collaborations.length, 5);
+  assert.equal(PROFILE.musaProjects.length, 2);
 });
 
 test("the public profile image is the owned source portrait", async () => {

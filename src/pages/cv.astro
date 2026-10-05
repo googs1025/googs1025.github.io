@@ -42,6 +42,9 @@ const emailHref = `mailto:${SITE.email}`;
             <a href={item.url}>{item.project}</a>{" "}{item.role}
           </li>
         ))}
+        {PROFILE.recognitions.map((item) => (
+          <li><a href={item.url}>{item.title}</a></li>
+        ))}
         {PROFILE.collaborations.map((item) => (
           <li><a href={item.url}>{item.project}</a>：{item.activity}</li>
         ))}

@@ -245,13 +245,56 @@ for (const html of [about, cv]) {
       ),
     );
   }
-  assert.doesNotMatch(main, /\b(?:19|20)\d{2}\b/);
-  assert.doesNotMatch(
+  for (const recognition of PROFILE.recognitions) {
+    assert.match(
+      main,
+      new RegExp(
+        `<a href="${escapeRegExp(recognition.url)}">${escapeRegExp(recognition.title)}</a>`,
+      ),
+    );
+  }
+  const mainWithoutApprovedRecognition = PROFILE.recognitions.reduce(
+    (source, recognition) =>
+      source.replace(
+        `<a href="${recognition.url}">${recognition.title}</a>`,
+        "",
+      ),
     main,
+  );
+  assert.doesNotMatch(mainWithoutApprovedRecognition, /\b(?:19|20)\d{2}\b/);
+  assert.doesNotMatch(
+    mainWithoutApprovedRecognition,
     /education|award|publication|professor|senior|staff|principal|lead|高级|资深|负责人/i,
   );
   assert.doesNotMatch(main, /\b\d+(?:\.\d+)?%/);
 }
+
+const aboutMain = profileMain(about);
+for (const focus of PROFILE.openSourceFocus) {
+  const focusHeading = focus.topic.replaceAll("&", "&amp;");
+  assert.match(aboutMain, new RegExp(`<h3>${escapeRegExp(focusHeading)}</h3>`));
+  for (const project of focus.projects) {
+    assert.match(
+      aboutMain,
+      new RegExp(
+        `<a href="${escapeRegExp(project.url)}">${escapeRegExp(project.project)}</a>`,
+      ),
+    );
+  }
+}
+for (const project of PROFILE.musaProjects) {
+  assert.match(
+    aboutMain,
+    new RegExp(
+      `<a href="${escapeRegExp(project.url)}">${escapeRegExp(project.project)}</a>：${escapeRegExp(project.description)}`,
+    ),
+  );
+}
+for (const topic of PROFILE.exploring) {
+  assert.match(aboutMain, new RegExp(`<li>${escapeRegExp(topic)}</li>`));
+}
+assert.match(aboutMain, new RegExp(escapeRegExp(PROFILE.chineseSummary)));
+assert.match(aboutMain, /WeChat · googs1025/);
 
 assert.match(about, /<title>About \| 江振瑜<\/title>/);
 assert.match(

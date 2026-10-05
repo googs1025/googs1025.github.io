@@ -54,13 +54,28 @@ test("profile data contains only the approved focus, roles, and projects", () =>
   assert.deepEqual(PROFILE.collaborations, [
     {
       project: "scheduler-plugins",
-      activity: "工作、讨论与代码评审",
+      activity: "Reviewer",
       url: "https://github.com/kubernetes-sigs/scheduler-plugins",
     },
     {
       project: "descheduler",
-      activity: "工作、讨论与代码评审",
+      activity: "Reviewer",
       url: "https://github.com/kubernetes-sigs/descheduler",
+    },
+    {
+      project: "llmaz",
+      activity: "Reviewer",
+      url: "https://github.com/llmaz/llmaz",
+    },
+    {
+      project: "Volcano",
+      activity: "Community member",
+      url: "https://github.com/volcano-sh/volcano",
+    },
+    {
+      project: "Koordinator",
+      activity: "Community member",
+      url: "https://github.com/koordinator-sh/koordinator",
     },
   ]);
 
@@ -69,7 +84,37 @@ test("profile data contains only the approved focus, roles, and projects", () =>
       ...PROFILE.openSourceRoles,
       ...PROFILE.collaborations,
     ].map(({ project }) => project),
-    ["Kubernetes", "Aibrix", "Volcano", "scheduler-plugins", "descheduler"],
+    [
+      "Kubernetes",
+      "Aibrix",
+      "Volcano",
+      "scheduler-plugins",
+      "descheduler",
+      "llmaz",
+      "Volcano",
+      "Koordinator",
+    ],
+  );
+  assert.deepEqual(
+    PROFILE.recognitions,
+    [
+      {
+        title: "Kubernetes Contributor Award 2025 — SIG Scheduling",
+        url: "https://www.kubernetes.dev/community/awards/2025/#scheduling",
+      },
+    ],
+  );
+  assert.deepEqual(
+    PROFILE.musaProjects.map(({ project }) => project),
+    ["fake-gpu-musa", "musa-learning-notes"],
+  );
+  assert.deepEqual(
+    PROFILE.openSourceFocus.map(({ topic }) => topic),
+    [
+      "Kubernetes Scheduling",
+      "LLM Inference Infrastructure",
+      "GPU & Heterogeneous Computing",
+    ],
   );
 });
 
@@ -82,6 +127,10 @@ test("profile project URLs are frozen HTTPS GitHub links", () => {
     PROFILE.technicalFocus,
     PROFILE.openSourceRoles,
     PROFILE.collaborations,
+    PROFILE.openSourceFocus,
+    PROFILE.musaProjects,
+    PROFILE.recognitions,
+    PROFILE.exploring,
   ]) {
     assert.equal(Object.isFrozen(collection), true);
   }
@@ -89,16 +138,28 @@ test("profile project URLs are frozen HTTPS GitHub links", () => {
   for (const project of [
     ...PROFILE.openSourceRoles,
     ...PROFILE.collaborations,
+    ...PROFILE.musaProjects,
+    ...PROFILE.recognitions,
   ]) {
     const url = new URL(project.url);
     assert.equal(url.protocol, "https:");
-    assert.equal(url.hostname, "github.com");
+    assert.ok(
+      ["github.com", "www.kubernetes.dev"].includes(url.hostname),
+    );
     assert.equal(Object.isFrozen(project), true);
+  }
+
+  for (const focus of PROFILE.openSourceFocus) {
+    assert.equal(Object.isFrozen(focus), true);
+    assert.equal(Object.isFrozen(focus.projects), true);
+    for (const project of focus.projects) {
+      assert.equal(Object.isFrozen(project), true);
+    }
   }
 });
 
-test("profile data has no unsupported dates, credentials, metrics, or title levels", () => {
-  const forbiddenKeys = /^(?:date|dates|start|end|education|award|awards|metric|metrics|level|title)$/i;
+test("profile data has no unsupported credentials, metrics, or title levels", () => {
+  const forbiddenKeys = /^(?:date|dates|start|end|education|metric|metrics|level)$/i;
   const visit = (value) => {
     if (Array.isArray(value)) {
       value.forEach(visit);
@@ -114,10 +175,15 @@ test("profile data has no unsupported dates, credentials, metrics, or title leve
 
   visit(PROFILE);
 
-  const serialized = JSON.stringify(PROFILE);
+  const serialized = JSON.stringify(PROFILE)
+    .replace("Kubernetes Contributor Award 2025 — SIG Scheduling", "")
+    .replace(
+      "https://www.kubernetes.dev/community/awards/2025/#scheduling",
+      "",
+    );
   assert.doesNotMatch(serialized, /\b(?:19|20)\d{2}\b/);
   assert.doesNotMatch(
     serialized,
-    /education|university|award|publication|professor|senior|staff|principal|lead|高级|资深|负责人/i,
+    /education|university|publication|professor|senior|staff|principal|lead|高级|资深|负责人/i,
   );
 });

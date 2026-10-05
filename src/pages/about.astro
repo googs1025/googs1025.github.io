@@ -44,12 +44,15 @@ const emailHref = `mailto:${SITE.email}`;
     </section>
 
     <section class="profile-section" aria-labelledby="about-open-source">
-      <h2 id="about-open-source">开源社区</h2>
+      <h2 id="about-open-source">开源角色与社区</h2>
       <ul class="role-list">
         {PROFILE.openSourceRoles.map((item) => (
           <li>
             <a href={item.url}>{item.project}</a>{" "}{item.role}
           </li>
+        ))}
+        {PROFILE.recognitions.map((item) => (
+          <li><a href={item.url}>{item.title}</a></li>
         ))}
         {PROFILE.collaborations.map((item) => (
           <li><a href={item.url}>{item.project}</a>：{item.activity}</li>
@@ -57,11 +60,49 @@ const emailHref = `mailto:${SITE.email}`;
       </ul>
     </section>
 
+    <section class="profile-section" aria-labelledby="about-open-source-focus">
+      <h2 id="about-open-source-focus">开源方向</h2>
+      {PROFILE.openSourceFocus.map((focus) => (
+        <div class="cv-entry">
+          <h3>{focus.topic}</h3>
+          <ul class="role-list">
+            {focus.projects.map((project) => (
+              <li><a href={project.url}>{project.project}</a></li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </section>
+
+    <section class="profile-section" aria-labelledby="about-musa">
+      <h2 id="about-musa">MUSA 生态项目</h2>
+      <ul class="role-list">
+        {PROFILE.musaProjects.map((project) => (
+          <li>
+            <a href={project.url}>{project.project}</a>：{project.description}
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <section class="profile-section" aria-labelledby="about-exploring">
+      <h2 id="about-exploring">正在探索</h2>
+      <ul class="fact-list">
+        {PROFILE.exploring.map((topic) => <li>{topic}</li>)}
+      </ul>
+    </section>
+
+    <section class="profile-section" aria-labelledby="about-summary">
+      <h2 id="about-summary">中文简介</h2>
+      <p>{PROFILE.chineseSummary}</p>
+    </section>
+
     <section class="profile-section" aria-labelledby="about-contact">
       <h2 id="about-contact">联系</h2>
       <ul class="contact-list">
         <li><a href={SITE.github}>GitHub · {SITE.handle.replace(/^@/, "")}</a></li>
         <li><a href={emailHref}>{SITE.email}</a></li>
+        <li>WeChat · googs1025</li>
       </ul>
     </section>
   </article>
