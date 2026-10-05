@@ -11,7 +11,7 @@ const emailHref = `mailto:${SITE.email}`;
   description={`${PROFILE.identity.name}（${PROFILE.identity.latinName}）的开源方向、社区角色与 MUSA 生态实践。`}
 >
   <article class="content profile-page" data-pagefind-body>
-    <section class="profile-intro" aria-labelledby="about-me">
+    <section class="profile-intro" aria-labelledby="profile-name">
       <img
         class="profile-image"
         src="/images/profile.jpg"
@@ -21,10 +21,11 @@ const emailHref = `mailto:${SITE.email}`;
       />
       <div>
         <p class="profile-label">About</p>
-        <h1 id="about-me">1. About Me</h1>
+        <h1 id="profile-name">{PROFILE.identity.latinName}</h1>
         <p class="profile-handle">
           {PROFILE.identity.latinName} · {PROFILE.identity.handle}
         </p>
+        <h2 id="about-me">1. About Me</h2>
         <blockquote>
           <p>{PROFILE.identity.summary}</p>
           {PROFILE.experience.map((item) => <p>{item.summary}</p>)}

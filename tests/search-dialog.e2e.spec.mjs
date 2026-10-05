@@ -10,7 +10,7 @@ test("enhanced search finds the indexed About page and restores focus", async ({
   await dialog.getByRole("searchbox", { name: "搜索关键词" }).fill("Kubernetes");
 
   const result = dialog.getByRole("link", {
-    name: "江振瑜",
+    name: "CYJiang",
   });
   await expect(result).toBeVisible();
   const href = await result.getAttribute("href");

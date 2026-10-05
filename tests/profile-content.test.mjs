@@ -53,6 +53,8 @@ test("About and CV render profile facts from shared data", async () => {
   }
 
   assert.match(about, /PROFILE\.identity\.motto/);
+  assert.match(about, /<h1[^>]*>\{PROFILE\.identity\.latinName\}<\/h1>/);
+  assert.match(about, /<h2[^>]*>1\. About Me<\/h2>/);
   assert.doesNotMatch(about, />工作<|>技术方向<|>开源方向</);
 });
 
