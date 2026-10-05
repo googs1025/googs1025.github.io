@@ -8,6 +8,7 @@ import {
   assertExactPathSet,
   assertHtmlFilesOmitTerms,
   assertLegacyRedirectHtml,
+  findLegacyRedirectPages,
   routePathToHtmlFile,
 } from "./verify-build-lib.mjs";
 
@@ -180,8 +181,9 @@ const legacyPages = localPublishedEntries.flatMap(({ path, data }) =>
 );
 const expectedLegacyFiles = legacyPages.map(({ file }) => file);
 const expectedLegacyFileSet = new Set(expectedLegacyFiles);
-const generatedLegacyPages = distFiles.filter((path) =>
-  expectedLegacyFileSet.has(path),
+const generatedLegacyPages = await findLegacyRedirectPages(
+  generatedHtmlFiles,
+  readDist,
 );
 const generatedCanonicalPostPages = generatedPostPages.filter(
   (path) => !expectedLegacyFileSet.has(path),

@@ -1,5 +1,6 @@
 ---
 import { getCollection, type CollectionEntry } from "astro:content";
+import { readdir } from "node:fs/promises";
 
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import { legacyRedirectPaths } from "@/lib/posts.mjs";
@@ -11,7 +12,8 @@ interface Props {
 
 export async function getStaticPaths() {
   const posts: CollectionEntry<"blog">[] = await getCollection("blog");
-  return legacyRedirectPaths(posts);
+  const publicFiles = await readdir("public", { recursive: true });
+  return legacyRedirectPaths(posts, { publicFiles });
 }
 
 const { title, target } = Astro.props;

@@ -36,6 +36,21 @@ export function routePathToHtmlFile(routePath) {
   return route ? `${route}/index.html` : "index.html";
 }
 
+const LEGACY_REDIRECT_META =
+  /<meta\b(?=[^>]*\bhttp-equiv=["']refresh["'])(?=[^>]*\bcontent=["']0;url=\/posts\/)[^>]*>/i;
+
+export async function findLegacyRedirectPages(paths, readHtml) {
+  const legacyPages = [];
+
+  for (const path of paths) {
+    if (LEGACY_REDIRECT_META.test(await readHtml(path))) {
+      legacyPages.push(path);
+    }
+  }
+
+  return legacyPages;
+}
+
 function escapeRegExp(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }

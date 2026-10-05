@@ -427,7 +427,9 @@ test("post routes render local published entries with deterministic adjacent pos
 test("legacy routes render validated immediate compatibility pages", async () => {
   const page = await read("src/pages/[...legacy].astro");
 
-  assert.match(page, /legacyRedirectPaths\(posts\)/);
+  assert.match(page, /legacyRedirectPaths\(posts,\s*\{\s*publicFiles\s*\}\)/);
+  assert.match(page, /readdir\(["']public["'][\s\S]*recursive:\s*true/);
+  assert.match(page, /publicFiles/);
   assert.match(page, /canonical=\{target\}/);
   assert.match(page, /http-equiv=["']refresh["']/);
   assert.match(page, /content=\{`0;url=\$\{target\}`\}/);

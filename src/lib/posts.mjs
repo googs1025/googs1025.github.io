@@ -22,7 +22,11 @@ function normalizedRoutePath(path) {
   return normalized === "/" ? normalized : normalized.replace(/\/+$/, "");
 }
 
-export function legacyRedirectPaths(posts) {
+/**
+ * @param {any[]} posts
+ * @param {{ publicFiles?: string[] }} [options]
+ */
+export function legacyRedirectPaths(posts, { publicFiles = [] } = {}) {
   const published = publishedPosts(posts);
   const localPosts = published.filter(({ data }) => !data.canonicalURL);
   const occupied = new Set(
@@ -34,6 +38,9 @@ export function legacyRedirectPaths(posts) {
       "/404.html",
       "/favicon.svg",
       "/rss.xml",
+      "/sitemap-index.xml",
+      "/sitemap-0.xml",
+      ...publicFiles.map((path) => `/${path}`),
       ...archiveDynamicPages(published).map(
         ({ currentPage }) => `/blog/${currentPage}/`,
       ),
@@ -44,6 +51,7 @@ export function legacyRedirectPaths(posts) {
     ].map(normalizedRoutePath),
   );
   const routes = [];
+  const reservedPrefixes = ["/pagefind", "/_astro"];
 
   for (const post of localPosts) {
     for (const legacyURL of post.data.legacyURLs ?? []) {
@@ -52,7 +60,13 @@ export function legacyRedirectPaths(posts) {
       }
 
       const normalized = normalizedRoutePath(legacyURL);
-      if (occupied.has(normalized)) {
+      if (
+        occupied.has(normalized) ||
+        reservedPrefixes.some(
+          (prefix) =>
+            normalized === prefix || normalized.startsWith(`${prefix}/`),
+        )
+      ) {
         throw new Error(`Legacy URL collision: "${legacyURL}"`);
       }
       occupied.add(normalized);

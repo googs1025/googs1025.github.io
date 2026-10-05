@@ -62,7 +62,7 @@ test("legacy redirects are generated only for published local posts", () => {
   ]);
 });
 
-test("legacy redirects reject duplicate and canonical route collisions", () => {
+test("legacy redirects reject duplicate, generated, and public path collisions", () => {
   const post = (id, legacyURLs) => ({
     id,
     data: {
@@ -85,14 +85,41 @@ test("legacy redirects reject duplicate and canonical route collisions", () => {
       ]),
     { message: 'Legacy URL collision: "/posts/two/"' },
   );
-  assert.throws(() => legacyRedirectPaths([post("one", ["/about/"])]), {
-    message: 'Legacy URL collision: "/about/"',
-  });
+  for (const path of [
+    "/",
+    "/about/",
+    "/blog/",
+    "/cv/",
+    "/404.html",
+    "/rss.xml",
+    "/sitemap-index.xml",
+    "/sitemap-0.xml",
+    "/pagefind/pagefind.js",
+    "/_astro/app.js",
+  ]) {
+    assert.throws(() => legacyRedirectPaths([post("one", [path])]), {
+      message: `Legacy URL collision: "${path}"`,
+    });
+  }
+
+  for (const path of ["/favicon.svg", "/images/profile.jpg"]) {
+    assert.throws(
+      () =>
+        legacyRedirectPaths([post("one", [path])], {
+          publicFiles: ["favicon.svg", "images/profile.jpg"],
+        }),
+      { message: `Legacy URL collision: "${path}"` },
+    );
+  }
 });
 
 test("categoryPath encodes a validated category into one route segment", () => {
   assert.equal(categoryPath("云原生"), "/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/");
   assert.throws(() => categoryPath("Kubernetes/调度"), {
+    name: "TypeError",
+    message: "category must be a safe path segment",
+  });
+  assert.throws(() => categoryPath("100% Kubernetes"), {
     name: "TypeError",
     message: "category must be a safe path segment",
   });

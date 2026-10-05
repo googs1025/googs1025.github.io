@@ -5,8 +5,44 @@ import {
   assertExactPathSet,
   assertHtmlFilesOmitTerms,
   assertLegacyRedirectHtml,
+  findLegacyRedirectPages,
   routePathToHtmlFile,
 } from "../scripts/verify-build-lib.mjs";
+
+test("legacy page discovery exposes unexpected redirect-shaped output", async () => {
+  const htmlByPath = new Map([
+    ["index.html", '<link rel="canonical" href="https://googs1025.github.io/">'],
+    [
+      "old/expected/index.html",
+      '<meta http-equiv="refresh" content="0;url=/posts/current/">',
+    ],
+    [
+      "old/unexpected/index.html",
+      '<meta http-equiv="refresh" content="0;url=/posts/other/">',
+    ],
+  ]);
+  const actual = await findLegacyRedirectPages(
+    [...htmlByPath.keys()],
+    async (path) => htmlByPath.get(path),
+  );
+
+  assert.deepEqual(actual, [
+    "old/expected/index.html",
+    "old/unexpected/index.html",
+  ]);
+  assert.throws(
+    () =>
+      assertExactPathSet(
+        actual,
+        ["old/expected/index.html"],
+        "legacy redirect pages",
+      ),
+    {
+      message:
+        "legacy redirect pages mismatch; missing: none; unexpected: old/unexpected/index.html",
+    },
+  );
+});
 
 test("path set verification rejects missing and unexpected generated pages", () => {
   assert.doesNotThrow(() =>

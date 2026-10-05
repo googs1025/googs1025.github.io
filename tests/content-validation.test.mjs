@@ -23,6 +23,7 @@ test("category labels are non-empty safe path segments", () => {
     String.raw`Kubernetes\调度`,
     "topic?draft",
     "topic#section",
+    "100% Kubernetes",
   ]) {
     assert.equal(isCategoryLabel(value), false, JSON.stringify(value));
   }
