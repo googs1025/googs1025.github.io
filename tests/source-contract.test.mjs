@@ -213,7 +213,7 @@ test("Playwright runs production search and no-JS smoke tests", async () => {
   assert.match(config, /baseURL:\s*["']http:\/\/127\.0\.0\.1:4321["']/);
   assert.match(smoke, /javaScriptEnabled:\s*false/);
   assert.match(smoke, /Kubernetes/);
-  assert.match(smoke, /name:\s*["']江振瑜["']/);
+  assert.match(smoke, /name:\s*["']CYJiang["']/);
   assert.match(smoke, /href\)\.toBe\(["']\/about\/["']\)/);
   assert.match(smoke, /press\(["']Escape["']\)/);
   assert.match(gitignore, /^test-results\/$/m);
